@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "staff/_nav.html" import staff_nav with context %}
+{% block title %}Khu vực nhân viên{% endblock %}
+{% block content %}
+{% set c = stats.counts %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ staff_nav('dashboard') }}</div>
+  <div class="col-lg-9">
+    <h1 class="h4 mb-3">Tổng quan</h1>
+    <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+      <div class="col"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <div class="small text-muted">Đơn hôm nay</div><div class="fs-3 fw-bold">{{ stats.today }}</div></div></div></div>
+      {% for code in ['PENDING_CONFIRM', 'CONFIRMED', 'PACKING', 'SHIPPING'] %}
+      <div class="col"><a href="{{ url_for('staff.orders', status=code) }}" class="text-decoration-none">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <div class="small text-muted">{{ labels[code] }}</div>
+          <div class="fs-3 fw-bold text-{{ badges[code] if badges[code] in ['primary', 'info', 'warning', 'danger', 'success'] else 'dark' }}">{{ c.get(code, 0) }}</div>
+        </div></div></a></div>
+      {% endfor %}
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h2 class="h6">Cần xử lý ngay</h2>
+          <ul class="list-unstyled mb-0 small">
+            <li class="mb-1"><span class="badge text-bg-info">{{ c.get('PENDING_CONFIRM', 0) }}</span> đơn chờ xác nhận</li>
+            <li class="mb-1"><span class="badge text-bg-primary">{{ c.get('CONFIRMED', 0) }}</span> đơn đã xác nhận, chờ đóng gói</li>
+            <li class="mb-1"><span class="badge text-bg-primary">{{ c.get('PACKING', 0) }}</span> đơn đang đóng gói, chờ bàn giao</li>
+            <li><span class="badge text-bg-primary">{{ c.get('SHIPPING', 0) }}</span> đơn đang giao</li>
+          </ul>
+        </div></div>
+      </div>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+          <h2 class="h6">Tồn kho</h2>
+          <p class="mb-1"><span class="badge {{ 'text-bg-danger' if stats.low_stock else 'text-bg-success' }}">{{ stats.low_stock }}</span>
+            biến thể sắp hết hàng (còn từ {{ stats.low_stock_threshold }} sản phẩm trở xuống)</p>
+          <p class="small text-muted mb-0">Chi tiết tồn kho và phiếu nhập có ở các mục tiếp theo của khu vực nhân viên.</p>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

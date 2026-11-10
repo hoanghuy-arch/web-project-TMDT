@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% from "_macros.html" import order_badge, payment_badge %}
+{% from "staff/_nav.html" import staff_nav with context %}
+{% block title %}Đơn {{ order.order_code }}{% endblock %}
+{% block content %}
+{% set can_process = current_user.has_permission('order.process') %}
+{% set can_ship = current_user.has_permission('shipment.update') %}
+{% set status = order.status %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ staff_nav('orders') }}</div>
+  <div class="col-lg-9">
+    <a href="{{ url_for('staff.orders') }}" class="small text-decoration-none">&larr; Danh sách đơn hàng</a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-1 mb-3">
+      <div>
+        <h1 class="h4 mb-0">Đơn {{ order.order_code }}</h1>
+        <div class="small text-muted">Đặt lúc {{ order.created_at | dt }}</div>
+      </div>
+      <div>{{ order_badge(status) }} {{ payment_badge(order.payment_status) if order.payment_status }}</div>
+    </div>
+
+    {# ---------------- khu vực thao tác ---------------- #}
+    <div class="card border-0 shadow-sm mb-3 border-start border-4 border-warning">
+      <div class="card-body">
+        <h2 class="h6 mb-3">Thao tác</h2>
+
+        {% if status == 'PENDING_PAYMENT' %}
+          <div class="text-muted small">Đơn đang chờ khách thanh toán online{% if deadline %} (hạn {{ deadline | dt }}){% endif %}. Hệ thống tự hủy và nhả hàng khi quá hạn.</div>
+
+        {% elif status == 'PENDING_CONFIRM' and can_process %}
+          <form method="post" action="{{ url_for('staff.order_confirm', order_code=order.order_code) }}" class="mb-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sz" type="submit"><i class="bi bi-check2-circle"></i> Xác nhận đơn</button>
+          </form>
+
+        {% elif status == 'CONFIRMED' and can_process %}
+          <form method="post" action="{{ url_for('staff.order_pack', order_code=order.order_code) }}" class="mb-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sz" type="submit"><i class="bi bi-box-seam"></i> Bắt đầu đóng gói</button>
+          </form>
+
+        {% elif status == 'PACKING' and can_ship %}
+          <form method="post" action="{{ url_for('staff.order_ship', order_code=order.order_code) }}" class="mb-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-2 align-items-end">
+              <div class="col-md-4">
+                <label for="carrier_id" class="form-label small mb-1">Đơn vị vận chuyển</label>
+                <select name="carrier_id" id="carrier_id" class="form-select form-select-sm" required>
+                  <option value="">-- Chọn --</option>
+                  {% for c in carriers %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+                </select>
+              </div>
+              <div class="col-md-5">
+                <label for="tracking_code" class="form-label small mb-1">Mã vận đơn</label>
+                <input type="text" name="tracking_code" id="tracking_code" class="form-control form-control-sm" maxlength="60" required>
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-sz btn-sm w-100" type="submit"><i class="bi bi-truck"></i> Bàn giao</button>
+              </div>
+            </div>
+            {% if not carriers %}<div class="small text-danger mt-1">Chưa có đơn vị vận chuyển nào đang hoạt động. Quản trị viên cần thêm đơn vị vận chuyển.</div>{% endif %}
+            <div class="form-text">Bàn giao sẽ xuất kho: trừ tồn kho và giải phóng lượng đang giữ của đơn này.</div>
+          </form>
+
+        {% elif status == 'SHIPPING' and can_ship %}
+          <form method="post" action="{{ url_for('staff.order_deliver', order_code=order.order_code) }}" class="mb-3"
+                onsubmit="return confirm('Xác nhận khách đã nhận hàng thành công?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-success" type="submit"><i class="bi bi-bag-check"></i> Giao hàng thành công</button>
+            {% if order.payment_method == 'COD' and order.payment_status == 'UNPAID' %}<span class="small text-muted ms-2">Đơn COD: sẽ ghi nhận đã thu tiền.</span>{% endif %}
+          </form>
+          <form method="post" action="{{ url_for('staff.order_incident', order_code=order.order_code) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="note" class="form-label small mb-1">Ghi nhận sự cố giao hàng (đơn vẫn giữ trạng thái Đang giao)</label>
+            <div class="input-group input-group-sm">
+              <input type="text" name="note" id="note" class="form-control" maxlength="500" placeholder="Ví dụ: khách không nghe máy, hẹn giao lại">
+              <button class="btn btn-outline-danger" type="submit">Ghi nhận sự cố</button>
+            </div>
+          </form>
+
+        {% elif status in ['COMPLETED', 'RETURNING', 'RETURNED', 'CANCELLED'] %}
+          <div class="text-muted small">Đơn ở trạng thái cuối của quy trình xử lý, không còn thao tác ở bước này.</div>
+        {% else %}
+          <div class="text-muted small">Bạn không có quyền thực hiện thao tác cho trạng thái này.</div>
+        {% endif %}
+
+        {% if status in ['PENDING_CONFIRM', 'CONFIRMED', 'PACKING'] and can_process %}
+        <hr>
+        <form method="post" action="{{ url_for('staff.order_cancel', order_code=order.order_code) }}"
+              onsubmit="return confirm('Hủy đơn hàng này? Hàng đang giữ sẽ được nhả.');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label for="reason" class="form-label small mb-1">Hủy đơn (bắt buộc nhập lý do, được ghi vào lịch sử và nhật ký)</label>
+          <div class="input-group input-group-sm">
+            <input type="text" name="reason" id="reason" class="form-control" maxlength="500" required placeholder="Lý do hủy đơn">
+            <button class="btn btn-outline-danger" type="submit">Hủy đơn</button>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-7">
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body">
+            <h2 class="h6 mb-3">Sản phẩm</h2>
+            {% for item in order['items'] %}
+            {% set v = item.variant %}
+            <div class="d-flex justify-content-between small mb-3">
+              <div>
+                {{ v.product.name }}
+                <div class="text-muted">{{ v.size.name }}, {{ v.color.name }} &middot; SKU {{ v.sku }} &times; {{ item.quantity }} &middot; {{ item.unit_price | vnd }}</div>
+                {% if status in ['PENDING_CONFIRM', 'CONFIRMED', 'PACKING'] %}
+                  <div class="text-muted">Kho: tồn {{ v.stock_quantity }} &middot; đang giữ {{ v.reserved_quantity }} &middot; khả dụng {{ v.available_quantity }}</div>
+                {% endif %}
+              </div>
+              <div class="fw-semibold">{{ item.line_total | vnd }}</div>
+            </div>
+            {% endfor %}
+            <hr>
+            <div class="d-flex justify-content-between small"><span>Tạm tính</span><span>{{ order.subtotal | vnd }}</span></div>
+            <div class="d-flex justify-content-between small"><span>Giảm giá{% if order.promotion %} ({{ order.promotion.code }}){% endif %}</span><span>{{ ('-' ~ (order.discount_amount | vnd)) if order.discount_amount else '0 ₫' }}</span></div>
+            <div class="d-flex justify-content-between small"><span>Phí vận chuyển</span><span>{{ order.shipping_fee | vnd }}</span></div>
+            <div class="d-flex justify-content-between fw-bold mt-2"><span>Tổng cộng</span><span class="text-sz">{{ order.total_amount | vnd }}</span></div>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h2 class="h6 mb-3">Khách hàng và giao hàng</h2>
+            <div><strong>{{ order.account.full_name }}</strong> &middot; {{ order.account.email }}</div>
+            <hr class="my-2">
+            <div><strong>Người nhận:</strong> {{ order.address.recipient_name }} &middot; {{ order.address.phone }}</div>
+            <div class="text-muted small">{{ order.address.full_address }}</div>
+            {% if order.note %}<div class="small mt-2"><span class="text-muted">Ghi chú của khách:</span> {{ order.note }}</div>{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body">
+            <h2 class="h6 mb-2">Thanh toán</h2>
+            {% if order.latest_payment %}
+              <div class="small">{{ 'Thanh toán khi nhận hàng (COD)' if order.payment_method == 'COD' else 'Thanh toán online' }}</div>
+              <div class="mt-1">{{ payment_badge(order.payment_status) }}</div>
+              <div class="small text-muted mt-1">Số tiền: {{ order.latest_payment.amount | vnd }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if order.shipment %}
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body">
+            <h2 class="h6 mb-2">Vận chuyển</h2>
+            <div class="small"><i class="bi bi-truck"></i> {{ order.shipment.carrier.name }}</div>
+            <div class="small">Mã vận đơn: <strong>{{ order.shipment.tracking_code }}</strong></div>
+            <div class="small text-muted">Bàn giao: {{ order.shipment.shipped_at | dt }}</div>
+            {% if order.shipment.delivered_at %}<div class="small text-success">Giao thành công: {{ order.shipment.delivered_at | dt }}</div>{% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if incidents %}
+        <div class="card border-0 shadow-sm mb-3 border-start border-4 border-danger">
+          <div class="card-body">
+            <h2 class="h6 mb-2 text-danger">Sự cố giao hàng</h2>
+            {% for i in incidents %}
+              <div class="small mb-2">{{ i.new_value.note }}<div class="text-muted">{{ i.created_at | dt }} &middot; {{ i.account.full_name if i.account else 'Hệ thống' }}</div></div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h2 class="h6 mb-3">Lịch sử trạng thái</h2>
+            <ul class="list-unstyled mb-0 small">
+              {% for h in order.status_history | reverse %}
+              <li class="mb-2">
+                <div>{{ order_badge(h.to_status) }}</div>
+                <div class="text-muted">{{ h.changed_at | dt }} &middot; {{ h.changed_by.full_name if h.changed_by else 'Hệ thống' }}</div>
+                {% if h.reason %}<div>{{ h.reason }}</div>{% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+# Web framework
+Flask>=3.0,<4.0
+python-dotenv>=1.0
+
+# ORM + migration
+Flask-SQLAlchemy>=3.1,<4.0
+Flask-Migrate>=4.0,<5.0
+
+# Xác thực, form, bảo mật
+Flask-Login>=0.6.3,<0.7
+Flask-WTF>=1.2,<2.0
+Flask-Limiter>=3.5,<4.0
+email-validator>=2.1
+bcrypt>=4.1
+
+# Email
+Flask-Mail>=0.9.1
+
+# MySQL 8 (cryptography cần cho caching_sha2_password)
+PyMySQL>=1.1
+cryptography>=42.0
+
+# Tác vụ nền
+APScheduler>=3.10,<4.0
+
+# Triển khai
+gunicorn>=21.2
+
+# Kiểm thử
+pytest>=8.0
+locust>=2.20

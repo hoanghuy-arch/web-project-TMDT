@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}SportZone{% endblock %} | SportZone</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  {% block head %}{% endblock %}
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+  <nav class="navbar navbar-expand-lg navbar-dark sz-navbar sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{{ url_for('shop.home') }}">
+        <i class="bi bi-lightning-charge-fill"></i> SportZone
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+              aria-controls="mainNav" aria-expanded="false" aria-label="Mở menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('shop.home') }}">Trang chủ</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('shop.product_list') }}">Sản phẩm</a></li>
+          {# Giỏ hàng, Đơn của tôi... được thêm ở các task sau #}
+        </ul>
+        <form class="d-flex my-2 my-lg-0 me-lg-3" role="search" action="{{ url_for('shop.product_list') }}" method="get">
+          <input class="form-control form-control-sm" type="search" name="q" maxlength="100" placeholder="Tìm sản phẩm..."
+                 aria-label="Tìm kiếm sản phẩm" value="{{ request.args.get('q', '') if request.endpoint == 'shop.product_list' else '' }}">
+          <button class="btn btn-sm btn-sz ms-1" type="submit" aria-label="Tìm"><i class="bi bi-search"></i></button>
+        </form>
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          {% if not current_user.is_authenticated or current_user.role_code == 'CUSTOMER' %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('account.cart') }}">
+              <i class="bi bi-bag"></i> Giỏ hàng
+              {% if cart_count %}<span class="badge rounded-pill text-bg-danger">{{ cart_count }}</span>{% endif %}
+            </a>
+          </li>
+          {% endif %}
+          {% if current_user.is_authenticated %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle"></i> {{ current_user.full_name }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item-text small text-muted">{{ current_user.role_code | role_label }}</span></li>
+              <li><hr class="dropdown-divider"></li>
+              {% if current_user.role_code in ['STAFF', 'ADMIN'] %}
+              <li><a class="dropdown-item" href="{{ url_for('staff.dashboard') }}">Khu vực nhân viên</a></li>
+              {% endif %}
+              <li><a class="dropdown-item" href="{{ url_for('account.profile') }}">Hồ sơ của tôi</a></li>
+              {% if current_user.role_code == 'CUSTOMER' %}
+              <li><a class="dropdown-item" href="{{ url_for('account.orders') }}">Đơn của tôi</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('account.addresses') }}">Sổ địa chỉ</a></li>
+              {% endif %}
+              <li><a class="dropdown-item" href="{{ url_for('account.change_password') }}">Đổi mật khẩu</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form method="post" action="{{ url_for('auth.logout') }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="dropdown-item">Đăng xuất</button>
+                </form>
+              </li>
+            </ul>
+          </li>
+          {% else %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Đăng nhập</a></li>
+          <li class="nav-item ms-lg-2">
+            <a class="btn btn-sm btn-sz" href="{{ url_for('auth.register') }}">Đăng ký</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-grow-1 py-4">
+    <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+          </div>
+        {% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="sz-footer py-4 mt-auto">
+    <div class="container d-flex flex-column flex-md-row justify-content-between small">
+      <span>&copy; 2026 SportZone. Trang phục thể thao thương hiệu riêng.</span>
+      <span>Đồ án thương mại điện tử B2C</span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

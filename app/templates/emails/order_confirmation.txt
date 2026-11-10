@@ -1,0 +1,21 @@
+Xin chào {{ full_name }},
+
+Cảm ơn bạn đã đặt hàng tại SportZone. Đơn hàng {{ order.order_code }} của bạn đã được ghi nhận.
+
+Sản phẩm:
+{% for item in order.items -%}
+- {{ item.variant.product.name }} ({{ item.variant.size.name }}, {{ item.variant.color.name }}) x {{ item.quantity }}: {{ item.line_total | vnd }}
+{% endfor %}
+Tạm tính: {{ order.subtotal | vnd }}
+{% if order.discount_amount %}Giảm giá: -{{ order.discount_amount | vnd }}
+{% endif %}Phí vận chuyển: {{ order.shipping_fee | vnd }}
+Tổng thanh toán: {{ order.total_amount | vnd }}
+
+Giao đến: {{ address.recipient_name }} - {{ address.phone }}
+{{ address.full_address }}
+
+Phương thức thanh toán: {{ 'Thanh toán khi nhận hàng (COD)' if order.payment_method == 'COD' else 'Thanh toán online' }}
+
+Chúng tôi sẽ thông báo khi đơn hàng thay đổi trạng thái.
+
+SportZone

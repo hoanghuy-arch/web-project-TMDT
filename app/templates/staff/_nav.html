@@ -1,0 +1,9 @@
+{# Menu bên trái khu vực nhân viên. active: dashboard | orders #}
+{% macro staff_nav(active) -%}
+<div class="list-group shadow-sm mb-3">
+  <a href="{{ url_for('staff.dashboard') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'dashboard' }}"><i class="bi bi-speedometer2"></i> Tổng quan</a>
+  {% if current_user.has_permission('order.view') %}
+  <a href="{{ url_for('staff.orders') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'orders' }}"><i class="bi bi-receipt"></i> Đơn hàng</a>
+  {% endif %}
+</div>
+{%- endmacro %}

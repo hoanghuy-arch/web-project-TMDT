@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% from "_macros.html" import order_badge, payment_badge %}
+{% from "account/_nav.html" import account_nav with context %}
+{% block title %}Đơn {{ order.order_code }}{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ account_nav('orders') }}</div>
+  <div class="col-lg-9">
+    <a href="{{ url_for('account.orders') }}" class="small text-decoration-none">&larr; Đơn của tôi</a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-1 mb-3">
+      <div>
+        <h1 class="h4 mb-0">Đơn {{ order.order_code }}</h1>
+        <div class="small text-muted">Đặt lúc {{ order.created_at | dt }}</div>
+      </div>
+      <div>{{ order_badge(order.status) }}</div>
+    </div>
+
+    {% if order.status == 'PENDING_PAYMENT' and deadline %}
+    <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <span>Đơn đang chờ thanh toán online. Đơn sẽ tự hủy nếu chưa thanh toán trước {{ deadline | dt }}.</span>
+      {% if online_enabled %}<a href="{{ url_for('payment.start', order_code=order.order_code) }}" class="btn btn-sz btn-sm">Thanh toán ngay</a>{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="row g-3">
+      <div class="col-md-7">
+        <div class="card shadow-sm border-0 mb-3">
+          <div class="card-body">
+            <h2 class="h6 mb-3">Sản phẩm</h2>
+            {% for item in order['items'] %}
+            <div class="d-flex justify-content-between small mb-2">
+              <div>{{ item.variant.product.name }}
+                <div class="text-muted">{{ item.variant.size.name }}, {{ item.variant.color.name }} &times; {{ item.quantity }} &middot; {{ item.unit_price | vnd }}</div></div>
+              <div class="fw-semibold">{{ item.line_total | vnd }}</div>
+            </div>
+            {% endfor %}
+            <hr>
+            <div class="d-flex justify-content-between small"><span>Tạm tính</span><span>{{ order.subtotal | vnd }}</span></div>
+            <div class="d-flex justify-content-between small"><span>Giảm giá{% if order.promotion %} ({{ order.promotion.code }}){% endif %}</span><span>{{ ('-' ~ (order.discount_amount | vnd)) if order.discount_amount else '0 ₫' }}</span></div>
+            <div class="d-flex justify-content-between small"><span>Phí vận chuyển</span><span>{{ order.shipping_fee | vnd }}</span></div>
+            <div class="d-flex justify-content-between fw-bold mt-2"><span>Tổng cộng</span><span class="text-sz">{{ order.total_amount | vnd }}</span></div>
+          </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h2 class="h6 mb-3">Giao hàng đến</h2>
+            <div><strong>{{ order.address.recipient_name }}</strong> &middot; {{ order.address.phone }}</div>
+            <div class="text-muted small">{{ order.address.full_address }}</div>
+            {% if order.note %}<div class="small mt-2"><span class="text-muted">Ghi chú:</span> {{ order.note }}</div>{% endif %}
+            {% if order.shipment %}
+              <hr>
+              <div class="small"><i class="bi bi-truck"></i> {{ order.shipment.carrier.name }} &middot; Mã vận đơn: <strong>{{ order.shipment.tracking_code }}</strong></div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5">
+        <div class="card shadow-sm border-0 mb-3">
+          <div class="card-body">
+            <h2 class="h6 mb-3">Thanh toán</h2>
+            {% if order.latest_payment %}
+              <div class="small mb-1">{{ 'Thanh toán khi nhận hàng (COD)' if order.payment_method == 'COD' else 'Thanh toán online' }}</div>
+              {{ payment_badge(order.payment_status) }}
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-3">
+          <div class="card-body">
+            <h2 class="h6 mb-3">Lịch sử trạng thái</h2>
+            <ul class="list-unstyled mb-0 small sz-timeline">
+              {% for h in order.status_history | reverse %}
+              <li class="mb-2">
+                <div>{{ order_badge(h.to_status) }}</div>
+                <div class="text-muted">{{ h.changed_at | dt }}</div>
+                {% if h.reason %}<div>{{ h.reason }}</div>{% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        {% if can_cancel %}
+        <div class="card shadow-sm border-0 border-danger-subtle">
+          <div class="card-body">
+            <h2 class="h6 mb-2">Hủy đơn hàng</h2>
+            <form method="post" action="{{ url_for('account.order_cancel', order_code=order.order_code) }}" onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <textarea name="reason" class="form-control form-control-sm mb-2" rows="2" maxlength="500" placeholder="Lý do hủy (không bắt buộc)"></textarea>
+              <button type="submit" class="btn btn-outline-danger btn-sm w-100">Hủy đơn</button>
+            </form>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

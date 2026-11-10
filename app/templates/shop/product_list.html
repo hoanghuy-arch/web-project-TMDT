@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% from "shop/_cards.html" import product_card %}
+{% from "shop/_pager.html" import pager %}
+{% block title %}{{ category.name if category else ('Tìm "' ~ f.q ~ '"' if f.q else 'Sản phẩm') }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{{ url_for('shop.home') }}">Trang chủ</a></li>
+    <li class="breadcrumb-item {{ 'active' if not category }}">{% if category %}<a href="{{ url_for('shop.product_list') }}">Sản phẩm</a>{% else %}Sản phẩm{% endif %}</li>
+    {% for c in breadcrumb %}
+      <li class="breadcrumb-item {{ 'active' if loop.last }}">
+        {% if loop.last %}{{ c.name }}{% else %}<a href="{{ url_for('shop.product_list', category=c.slug) }}">{{ c.name }}</a>{% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <div>
+    <h1 class="h4 mb-0">{{ category.name if category else 'Tất cả sản phẩm' }}</h1>
+    <div class="small text-muted">
+      {{ pagination.total }} sản phẩm{% if f.q %} cho từ khóa "<strong>{{ f.q }}</strong>"{% endif %}
+    </div>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <button class="btn btn-outline-secondary btn-sm d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#filters" aria-expanded="false" aria-controls="filters">
+      <i class="bi bi-funnel"></i> Bộ lọc
+    </button>
+    <label for="sort" class="small text-muted mb-0 d-none d-sm-block">Sắp xếp</label>
+    <select id="sort" name="sort" form="filter-form" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+      {% for key, label in sorts.items() %}
+        <option value="{{ key }}" {{ 'selected' if f.sort == key }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<div class="row g-4">
+  <aside class="col-lg-3">
+    <div class="collapse d-lg-block" id="filters">
+      <form method="get" action="{{ url_for('shop.product_list') }}" id="filter-form" class="sz-filter card card-body border-0 shadow-sm">
+        {% if f.q %}<input type="hidden" name="q" value="{{ f.q }}">{% endif %}
+        {% if f.category %}<input type="hidden" name="category" value="{{ f.category }}">{% endif %}
+
+        <div class="mb-3">
+          <div class="fw-semibold mb-2">Danh mục</div>
+          <ul class="list-unstyled mb-0 small">
+            <li><a href="{{ url_for('shop.product_list', q=f.q or None) }}" class="{{ 'fw-bold text-sz' if not f.category }}">Tất cả</a></li>
+            {% for c in categories %}
+              <li class="mt-1">
+                <a href="{{ url_for('shop.product_list', category=c.slug, q=f.q or None) }}" class="{{ 'fw-bold text-sz' if f.category == c.slug }}">{{ c.name }}</a>
+                {% for child in c.children if child.is_active %}
+                  <div class="ms-3"><a href="{{ url_for('shop.product_list', category=child.slug, q=f.q or None) }}" class="{{ 'fw-bold text-sz' if f.category == child.slug else 'text-muted' }}">{{ child.name }}</a></div>
+                {% endfor %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        {% if sizes %}
+        <div class="mb-3">
+          <div class="fw-semibold mb-2">Kích cỡ</div>
+          <div class="d-flex flex-wrap gap-1">
+            {% for s in sizes %}
+              <input type="checkbox" class="btn-check" name="size" id="size-{{ s.id }}" value="{{ s.id }}" {{ 'checked' if s.id in f.sizes }}>
+              <label class="btn btn-sm btn-outline-secondary" for="size-{{ s.id }}">{{ s.name }}</label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if colors %}
+        <div class="mb-3">
+          <div class="fw-semibold mb-2">Màu sắc</div>
+          <div class="d-flex flex-wrap gap-1">
+            {% for c in colors %}
+              <input type="checkbox" class="btn-check" name="color" id="color-{{ c.id }}" value="{{ c.id }}" {{ 'checked' if c.id in f.colors }}>
+              <label class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" for="color-{{ c.id }}">
+                <span class="sz-dot" style="background: {{ c.hex_code }}"></span>{{ c.name }}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="mb-3">
+          <div class="fw-semibold mb-2">Mức giá (₫)</div>
+          <div class="input-group input-group-sm">
+            <input type="number" min="0" step="1000" name="min_price" class="form-control" placeholder="Từ" value="{{ f.min_price if f.min_price is not none }}" aria-label="Giá từ">
+            <input type="number" min="0" step="1000" name="max_price" class="form-control" placeholder="Đến" value="{{ f.max_price if f.max_price is not none }}" aria-label="Giá đến">
+          </div>
+        </div>
+
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="in_stock" value="1" id="in_stock" {{ 'checked' if f.in_stock }}>
+          <label class="form-check-label" for="in_stock">Chỉ hiện sản phẩm còn hàng</label>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-sz btn-sm flex-fill">Áp dụng</button>
+          <a href="{{ clear_url }}" class="btn btn-outline-secondary btn-sm">Xóa lọc</a>
+        </div>
+      </form>
+    </div>
+  </aside>
+
+  <section class="col-lg-9">
+    {% if products %}
+      <div class="row row-cols-2 row-cols-md-3 g-3">
+        {% for p in products %}{{ product_card(p) }}{% endfor %}
+      </div>
+      {{ pager(pagination, list_url) }}
+    {% else %}
+      <div class="text-center py-5">
+        <i class="bi bi-search fs-1 text-muted"></i>
+        <h2 class="h5 mt-3">Không tìm thấy sản phẩm phù hợp</h2>
+        <p class="text-muted">Hãy thử đổi từ khóa hoặc bỏ bớt bộ lọc.</p>
+        {% if f.has_filters %}<a href="{{ url_for('shop.product_list') }}" class="btn btn-outline-sz">Xóa tất cả bộ lọc</a>{% endif %}
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

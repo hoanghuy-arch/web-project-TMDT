@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Chưa có ảnh">
+  <rect width="400" height="400" fill="#e9ecef"/>
+  <g fill="none" stroke="#adb5bd" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M140 110 L100 135 L125 180 L150 168 L150 290 L250 290 L250 168 L275 180 L300 135 L260 110 C250 135 150 135 140 110 Z"/>
+  </g>
+  <text x="200" y="335" font-family="Arial, sans-serif" font-size="22" text-anchor="middle" fill="#868e96">SportZone</text>
+</svg>

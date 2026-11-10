@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field %}
+{% from "account/_nav.html" import account_nav with context %}
+{% block title %}Hồ sơ của tôi{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ account_nav('profile') }}</div>
+  <div class="col-lg-9">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-4">Thông tin cá nhân</h1>
+        <form method="post" novalidate class="col-md-8 p-0">
+          {{ form.hidden_tag() }}
+          <div class="mb-3">
+            <label class="form-label" for="email-readonly">Email</label>
+            <input id="email-readonly" class="form-control" value="{{ current_user.email }}" disabled>
+            <div class="form-text">Email là tên đăng nhập nên không thể thay đổi.</div>
+          </div>
+          {{ field(form.full_name, autocomplete='name') }}
+          {{ field(form.phone, autocomplete='tel') }}
+          <button type="submit" class="btn btn-sz">Lưu thay đổi</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Kết quả thanh toán{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+  {% if ok %}
+    <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+    <h1 class="h4 mt-3">Thanh toán thành công</h1>
+  {% else %}
+    <i class="bi bi-x-circle-fill text-danger" style="font-size: 4rem;"></i>
+    <h1 class="h4 mt-3">Giao dịch chưa hoàn tất</h1>
+  {% endif %}
+  <p class="text-muted col-md-6 mx-auto">{{ message }}</p>
+  <div class="d-flex gap-2 justify-content-center">
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('account.orders') }}" class="btn btn-sz">Xem đơn hàng của tôi</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="btn btn-sz">Đăng nhập để xem đơn hàng</a>
+    {% endif %}
+    <a href="{{ url_for('shop.home') }}" class="btn btn-outline-secondary">Về trang chủ</a>
+  </div>
+</div>
+{% endblock %}

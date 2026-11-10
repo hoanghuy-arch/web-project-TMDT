@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, checkbox %}
+{% block title %}Đăng nhập{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-4 text-center">Đăng nhập</h1>
+        <form method="post" action="{{ url_for('auth.login', next=next_url) if next_url else url_for('auth.login') }}" novalidate>
+          {{ form.hidden_tag() }}
+          {{ field(form.email, placeholder='email@vidu.com', autocomplete='email') }}
+          {{ field(form.password, autocomplete='current-password') }}
+          {{ checkbox(form.remember) }}
+          <button type="submit" class="btn btn-sz w-100">Đăng nhập</button>
+        </form>
+        <div class="d-flex justify-content-between mt-3 small">
+          <a href="{{ url_for('auth.forgot_password') }}">Quên mật khẩu?</a>
+          <a href="{{ url_for('auth.register') }}">Tạo tài khoản mới</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% macro pager(pagination, list_url) -%}
+  {% if pagination.pages > 1 %}
+  <nav aria-label="Phân trang" class="mt-4">
+    <ul class="pagination justify-content-center flex-wrap">
+      <li class="page-item {{ 'disabled' if not pagination.has_prev }}">
+        <a class="page-link" href="{{ list_url(pagination.prev_num) if pagination.has_prev else '#' }}" aria-label="Trang trước">&laquo;</a>
+      </li>
+      {% for n in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if n %}
+          <li class="page-item {{ 'active' if n == pagination.page }}"><a class="page-link" href="{{ list_url(n) }}">{{ n }}</a></li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% endif %}
+      {% endfor %}
+      <li class="page-item {{ 'disabled' if not pagination.has_next }}">
+        <a class="page-link" href="{{ list_url(pagination.next_num) if pagination.has_next else '#' }}" aria-label="Trang sau">&raquo;</a>
+      </li>
+    </ul>
+  </nav>
+  {% endif %}
+{%- endmacro %}

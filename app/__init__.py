@@ -1,0 +1,87 @@
+"""Application factory của SportZone."""
+from flask import Flask, jsonify, render_template, request
+
+from config import get_config
+from app.extensions import csrf, db, limiter, login_manager, mail, migrate
+from app.logging_config import configure_logging
+from app.utils.formatters import register_filters
+
+
+def create_app(config_name=None):
+    app = Flask(__name__)
+    app.config.from_object(get_config(config_name))
+
+    configure_logging(app)
+    _init_extensions(app)
+    _register_blueprints(app)
+    _register_error_handlers(app)
+    _register_hooks(app)
+    register_filters(app)
+
+    @app.route("/health")
+    def health():
+        """Endpoint cho UptimeRobot / Docker healthcheck."""
+        return jsonify(status="ok")
+
+    return app
+
+
+def _init_extensions(app):
+    db.init_app(app)
+    migrate.init_app(app, db, render_as_batch=True)
+    login_manager.init_app(app)
+    csrf.init_app(app)
+    limiter.init_app(app)
+    mail.init_app(app)
+
+    # Import models để SQLAlchemy/Flask-Migrate nhận biết các bảng (Task 2)
+    from app import models  # noqa: F401
+
+
+def _register_blueprints(app):
+    from app.auth import bp as auth_bp
+    from app.shop import bp as shop_bp
+    from app.account import bp as account_bp
+    from app.payment import bp as payment_bp
+    from app.staff import bp as staff_bp
+    from app.admin import bp as admin_bp
+
+    app.register_blueprint(shop_bp)                              # công khai, đường dẫn gốc
+    app.register_blueprint(auth_bp, url_prefix="/auth")          # công khai
+    app.register_blueprint(account_bp, url_prefix="/account")    # khách hàng
+    app.register_blueprint(payment_bp, url_prefix="/payment")    # khách hàng + cổng thanh toán
+    app.register_blueprint(staff_bp, url_prefix="/staff")        # nhân viên, quản trị viên
+    app.register_blueprint(admin_bp, url_prefix="/admin")        # quản trị viên
+
+
+def _register_error_handlers(app):
+    def _render(code, title, message):
+        if request.path.startswith(("/payment/vnpay/ipn", "/health")):
+            return jsonify(error=title), code
+        return render_template("errors/error.html", code=code, title=title, message=message), code
+
+    @app.errorhandler(403)
+    def forbidden(_e):
+        return _render(403, "Không có quyền truy cập", "Bạn không có quyền thực hiện thao tác này.")
+
+    @app.errorhandler(404)
+    def not_found(_e):
+        return _render(404, "Không tìm thấy trang", "Trang bạn tìm không tồn tại hoặc đã bị xóa.")
+
+    @app.errorhandler(429)
+    def too_many(_e):
+        return _render(429, "Thao tác quá nhanh", "Bạn gửi yêu cầu quá nhiều lần. Vui lòng thử lại sau ít phút.")
+
+    @app.errorhandler(500)
+    def server_error(_e):
+        db.session.rollback()
+        return _render(500, "Lỗi hệ thống", "Đã có lỗi xảy ra. Vui lòng thử lại sau.")
+
+
+def _register_hooks(app):
+    @app.after_request
+    def security_headers(resp):
+        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+        resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+        resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        return resp

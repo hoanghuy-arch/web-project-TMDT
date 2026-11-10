@@ -1,0 +1,14 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+*.db
+*.sqlite3
+logs/*
+!logs/.gitkeep
+.pytest_cache/
+.idea/
+.vscode/
+instance/
+uploads/

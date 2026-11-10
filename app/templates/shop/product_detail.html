@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stars %}
+{% from "shop/_cards.html" import product_card %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block head %}<meta name="description" content="{{ (product.description or product.name) | striptags | truncate(155) }}">{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="{{ url_for('shop.home') }}">Trang chủ</a></li>
+    {% for c in breadcrumb %}
+      <li class="breadcrumb-item"><a href="{{ url_for('shop.product_list', category=c.slug) }}">{{ c.name }}</a></li>
+    {% endfor %}
+    <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+  </ol>
+</nav>
+
+<div class="row g-4 mb-5">
+  <div class="col-md-6">
+    {% set images = product.images %}
+    {% set primary = product.primary_image %}
+    <div class="sz-gallery-main rounded-3 overflow-hidden border mb-2">
+      <img id="main-image" src="{{ (primary.url if primary else None) | image_url }}" alt="{{ product.name }}" class="w-100">
+    </div>
+    {% if images | length > 1 %}
+    <div class="d-flex gap-2 flex-wrap">
+      {% for img in images %}
+        <button type="button" class="sz-thumb btn p-0 border rounded-2 overflow-hidden" data-full="{{ img.url | image_url }}" aria-label="Xem ảnh {{ loop.index }}">
+          <img src="{{ img.url | image_url }}" alt="" loading="lazy">
+        </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-md-6">
+    <h1 class="h3">{{ product.name }}</h1>
+    {% if reviews.count %}
+      <div class="mb-2"><a href="#reviews" class="text-decoration-none">{{ stars(reviews.average) }} <span class="small text-muted">{{ reviews.average }}/5 ({{ reviews.count }} đánh giá)</span></a></div>
+    {% endif %}
+    <div class="display-6 fw-bold text-sz mb-3">{{ product.price | vnd }}</div>
+
+    {% if product.in_stock %}
+      <div id="product-options" data-low-stock="{{ low_stock }}" data-max-per-item="{{ max_per_item }}">
+        <div class="mb-3">
+          <div class="fw-semibold mb-2">Màu sắc: <span id="selected-color-name" class="fw-normal text-muted">Chọn màu</span></div>
+          <div class="d-flex flex-wrap gap-2" id="color-options">
+            {% for c in colors %}
+              <input type="radio" class="btn-check" name="color" id="color-{{ c.id }}" value="{{ c.id }}" data-name="{{ c.name }}" autocomplete="off">
+              <label class="btn btn-outline-secondary d-flex align-items-center gap-2" for="color-{{ c.id }}">
+                <span class="sz-dot" style="background: {{ c.hex_code }}"></span>{{ c.name }}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="fw-semibold mb-2">Kích cỡ</div>
+          <div class="d-flex flex-wrap gap-2" id="size-options">
+            {% for s in sizes %}
+              <input type="radio" class="btn-check" name="size" id="size-{{ s.id }}" value="{{ s.id }}" autocomplete="off">
+              <label class="btn btn-outline-secondary sz-size-btn" for="size-{{ s.id }}">{{ s.name }}</label>
+            {% endfor %}
+          </div>
+        </div>
+        <div id="stock-status" class="mb-3 small text-muted" aria-live="polite">Vui lòng chọn màu và kích cỡ.</div>
+        {% include "shop/_add_to_cart.html" %}
+      </div>
+      <script type="application/json" id="variants-data">{{ variants_data | tojson }}</script>
+    {% else %}
+      <div class="alert alert-secondary"><i class="bi bi-x-circle"></i> Sản phẩm tạm hết hàng.</div>
+    {% endif %}
+
+    <hr class="my-4">
+    <div class="small text-muted mb-1">Danh mục: <a href="{{ url_for('shop.product_list', category=product.category.slug) }}">{{ product.category.name }}</a></div>
+    {% if product.description %}
+      <h2 class="h6 mt-3">Mô tả</h2>
+      <p class="text-muted" style="white-space: pre-line;">{{ product.description }}</p>
+    {% endif %}
+  </div>
+</div>
+
+<section id="reviews" class="mb-5">
+  <h2 class="h5 mb-3">Đánh giá từ khách hàng</h2>
+  {% if reviews.count %}
+    <div class="mb-3">{{ stars(reviews.average) }} <strong>{{ reviews.average }}</strong>/5 <span class="text-muted small">({{ reviews.count }} đánh giá)</span></div>
+    {% for r in reviews['items'] %}
+      <div class="border-bottom py-3">
+        <div class="d-flex justify-content-between">
+          <div><strong>{{ r.account.full_name | mask_name }}</strong> {{ stars(r.rating) }}</div>
+          <div class="small text-muted">{{ r.created_at | dt('%d/%m/%Y') }}</div>
+        </div>
+        {% if r.comment %}<p class="mb-0 mt-1" style="white-space: pre-line;">{{ r.comment }}</p>{% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">Chưa có đánh giá nào. Chỉ khách hàng đã mua sản phẩm mới có thể đánh giá.</p>
+  {% endif %}
+</section>
+
+{% if related %}
+<section class="mb-4">
+  <h2 class="h5 mb-3">Sản phẩm liên quan</h2>
+  <div class="row row-cols-2 row-cols-md-4 g-3">
+    {% for p in related %}{{ product_card(p) }}{% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/product.js') }}"></script>
+{% endblock %}

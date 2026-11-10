@@ -1,0 +1,25 @@
+{# Thẻ sản phẩm dùng cho trang chủ, danh sách và sản phẩm liên quan #}
+{% macro product_card(p) -%}
+  {% set img = p.primary_image %}
+  <div class="col">
+    <div class="card h-100 sz-card border-0 shadow-sm">
+      <a href="{{ url_for('shop.product_detail', slug=p.slug) }}" class="sz-card-img position-relative d-block">
+        <img src="{{ (img.url if img else None) | image_url }}" alt="{{ p.name }}" loading="lazy" class="card-img-top">
+        {% if not p.in_stock %}
+          <span class="badge text-bg-dark position-absolute top-0 start-0 m-2">Hết hàng</span>
+        {% endif %}
+      </a>
+      <div class="card-body d-flex flex-column">
+        <h3 class="h6 card-title mb-1">
+          <a href="{{ url_for('shop.product_detail', slug=p.slug) }}" class="text-decoration-none text-dark">{{ p.name }}</a>
+        </h3>
+        <div class="fw-bold text-sz mb-2">{{ p.price | vnd }}</div>
+        <div class="mt-auto d-flex gap-1 flex-wrap">
+          {% for c in p.available_colors %}
+            <span class="sz-dot" style="background: {{ c.hex_code }}" title="{{ c.name }}"></span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endmacro %}

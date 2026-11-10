@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Giỏ hàng{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Giỏ hàng của bạn</h1>
+
+{% if cart.lines %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    {% if cart.issue_count %}
+    <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <span><i class="bi bi-exclamation-triangle"></i> Có sản phẩm trong giỏ không thể đặt. Vui lòng điều chỉnh hoặc xóa trước khi đặt hàng.</span>
+      <form method="post" action="{{ url_for('account.cart_clean') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-outline-dark">Xóa sản phẩm không còn bán</button>
+      </form>
+    </div>
+    {% endif %}
+
+    {% for line in cart.lines %}
+    {% set img = line.product.primary_image %}
+    <div class="card shadow-sm mb-3 {{ 'border-warning' if line.issue else 'border-0' }}">
+      <div class="card-body">
+        <div class="row g-3 align-items-center">
+          <div class="col-3 col-md-2">
+            <div class="sz-card-img rounded-2"><img src="{{ (img.url if img else None) | image_url }}" alt="{{ line.product.name }}" loading="lazy"></div>
+          </div>
+          <div class="col-9 col-md-5">
+            {% if line.purchasable %}
+              <a href="{{ url_for('shop.product_detail', slug=line.product.slug) }}" class="fw-semibold text-decoration-none text-dark">{{ line.product.name }}</a>
+            {% else %}
+              <span class="fw-semibold">{{ line.product.name }}</span>
+            {% endif %}
+            <div class="small text-muted">Màu: {{ line.variant.color.name }} &middot; Cỡ: {{ line.variant.size.name }}</div>
+            <div class="small">{{ line.unit_price | vnd }}</div>
+            {% if line.issue %}<div class="small text-danger fw-semibold mt-1"><i class="bi bi-exclamation-circle"></i> {{ line.issue }}</div>{% endif %}
+          </div>
+          <div class="col-7 col-md-3">
+            {% if line.purchasable %}
+            <form method="post" action="{{ url_for('account.cart_update') }}" class="d-flex gap-1">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="variant_id" value="{{ line.variant.id }}">
+              <input type="number" name="quantity" min="1" max="{{ max_per_item }}" value="{{ line.quantity }}"
+                     class="form-control form-control-sm" style="width: 72px;" aria-label="Số lượng">
+              <button type="submit" class="btn btn-outline-secondary btn-sm">Cập nhật</button>
+            </form>
+            {% else %}
+              <span class="small text-muted">Số lượng: {{ line.quantity }}</span>
+            {% endif %}
+          </div>
+          <div class="col-5 col-md-2 text-end">
+            <div class="fw-bold">{{ (line.line_total | vnd) if line.purchasable else '—' }}</div>
+            <form method="post" action="{{ url_for('account.cart_remove') }}" class="mt-1">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="variant_id" value="{{ line.variant.id }}">
+              <button type="submit" class="btn btn-link btn-sm text-danger p-0">Xóa</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 position-sticky" style="top: 80px;">
+      <div class="card-body">
+        <h2 class="h6 mb-3">Tóm tắt</h2>
+        <div class="d-flex justify-content-between mb-1"><span>Số lượng</span><span>{{ cart.total_quantity }}</span></div>
+        <div class="d-flex justify-content-between fw-bold fs-5 mb-2"><span>Tạm tính</span><span class="text-sz">{{ cart.subtotal | vnd }}</span></div>
+        <p class="small text-muted">Phí vận chuyển và mã khuyến mãi được tính ở bước đặt hàng.</p>
+        {% if cart.can_checkout %}
+          {% include "account/_checkout_button.html" %}
+        {% else %}
+          <button type="button" class="btn btn-secondary w-100" disabled>Tiến hành đặt hàng</button>
+          <div class="small text-danger mt-2">Vui lòng xử lý các sản phẩm có cảnh báo để tiếp tục.</div>
+        {% endif %}
+        <a href="{{ url_for('shop.product_list') }}" class="btn btn-link btn-sm w-100 mt-2">Tiếp tục mua sắm</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<div class="text-center py-5 border rounded-3 bg-light">
+  <i class="bi bi-bag fs-1 text-muted"></i>
+  <p class="text-muted mt-2">Giỏ hàng của bạn đang trống.</p>
+  <a href="{{ url_for('shop.product_list') }}" class="btn btn-sz">Bắt đầu mua sắm</a>
+</div>
+{% endif %}
+{% endblock %}

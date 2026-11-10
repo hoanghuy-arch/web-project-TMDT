@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "_macros.html" import order_badge, payment_badge %}
+{% from "account/_nav.html" import account_nav with context %}
+{% from "shop/_pager.html" import pager %}
+{% block title %}Đơn của tôi{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ account_nav('orders') }}</div>
+  <div class="col-lg-9">
+    <h1 class="h4 mb-3">Đơn hàng của tôi</h1>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <a href="{{ url_for('account.orders') }}" class="btn btn-sm {{ 'btn-dark' if not status else 'btn-outline-secondary' }}">Tất cả</a>
+      {% for code, label in order_status_labels.items() if counts.get(code) %}
+        <a href="{{ url_for('account.orders', status=code) }}" class="btn btn-sm {{ 'btn-dark' if status == code else 'btn-outline-secondary' }}">{{ label }} ({{ counts[code] }})</a>
+      {% endfor %}
+    </div>
+
+    {% if orders %}
+      {% for o in orders %}
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+            <div>
+              <a href="{{ url_for('account.order_detail', order_code=o.order_code) }}" class="fw-bold text-decoration-none">{{ o.order_code }}</a>
+              <div class="small text-muted">{{ o.created_at | dt }}</div>
+            </div>
+            <div class="text-end">{{ order_badge(o.status) }} {{ payment_badge(o.payment_status) if o.payment_status }}</div>
+          </div>
+          <div class="small mt-2">
+            {% for item in o['items'][:3] %}
+              <div>{{ item.variant.product.name }} <span class="text-muted">&times; {{ item.quantity }}</span></div>
+            {% endfor %}
+            {% if o['items'] | length > 3 %}<div class="text-muted">và {{ o['items'] | length - 3 }} sản phẩm khác</div>{% endif %}
+          </div>
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <div>Tổng: <strong class="text-sz">{{ o.total_amount | vnd }}</strong></div>
+            <a href="{{ url_for('account.order_detail', order_code=o.order_code) }}" class="btn btn-outline-secondary btn-sm">Xem chi tiết</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {{ pager(pagination, list_url) }}
+    {% else %}
+      <div class="text-center py-5 border rounded-3 bg-light">
+        <i class="bi bi-receipt fs-1 text-muted"></i>
+        <p class="text-muted mt-2">{{ 'Không có đơn hàng nào ở trạng thái này.' if status else 'Bạn chưa có đơn hàng nào.' }}</p>
+        <a href="{{ url_for('shop.product_list') }}" class="btn btn-sz">Mua sắm ngay</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
