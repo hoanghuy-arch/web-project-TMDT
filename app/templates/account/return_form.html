@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "account/_nav.html" import account_nav with context %}
+{% block title %}Yêu cầu đổi trả{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ account_nav('orders') }}</div>
+  <div class="col-lg-9">
+    <a href="{{ url_for('account.order_detail', order_code=order.order_code) }}" class="small text-decoration-none">&larr; Đơn {{ order.order_code }}</a>
+    <h1 class="h4 mt-1">Yêu cầu đổi trả</h1>
+    <p class="text-muted small">Bạn có thể gửi yêu cầu đến hết {{ deadline | dt('%d/%m/%Y') }}. Cửa hàng sẽ xem xét, nếu chấp nhận bạn gửi hàng về để kiểm tra; hàng đạt điều kiện mới được hoàn tiền.</p>
+    <form method="post" action="{{ url_for('account.return_new', order_code=order.order_code) }}" class="card border-0 shadow-sm"><div class="card-body">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <table class="table table-sm align-middle">
+        <thead><tr><th>Sản phẩm</th><th class="text-end">Đã mua</th><th style="width: 130px;">Số lượng trả</th></tr></thead>
+        <tbody>
+        {% for item in order['items'] %}
+          <tr>
+            <td>{{ item.variant.product.name }}<div class="small text-muted">{{ item.variant.size.name }}, {{ item.variant.color.name }} &middot; {{ item.unit_price | vnd }}</div></td>
+            <td class="text-end">{{ item.quantity }}</td>
+            <td><input type="number" name="qty_{{ item.id }}" min="0" max="{{ item.quantity }}" value="{{ form.quantities.get(item.id, 0) if form.quantities.get(item.id) is not none else 0 }}" class="form-control form-control-sm"></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <label for="reason" class="form-label">Lý do đổi trả</label>
+      <textarea name="reason" id="reason" rows="3" maxlength="500" class="form-control mb-3" required placeholder="Ví dụ: sản phẩm bị lỗi đường may, không đúng kích cỡ...">{{ form.reason }}</textarea>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-sz">Gửi yêu cầu</button>
+        <a href="{{ url_for('account.order_detail', order_code=order.order_code) }}" class="btn btn-outline-secondary">Hủy</a>
+      </div>
+    </div></form>
+  </div>
+</div>
+{% endblock %}

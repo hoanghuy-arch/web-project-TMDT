@@ -10,7 +10,7 @@ from app.extensions import db
 from app.models import (Account, AuditLog, ProductVariant, SalesOrder, SalesOrderItem, SalesOrderStatusHistory,
                         Shipment)
 from app.models.base import utcnow
-from app.services import catalog_service
+from app.services import catalog_service, return_service
 
 _VN = timedelta(hours=7)
 
@@ -37,7 +37,7 @@ def low_stock_count():
 
 def dashboard_stats():
     return {"counts": status_counts(), "today": orders_today(), "low_stock": low_stock_count(),
-            "low_stock_threshold": catalog_service.low_stock_threshold()}
+            "low_stock_threshold": catalog_service.low_stock_threshold(), "returns_pending": return_service.pending_count()}
 
 
 def search_orders(status=None, q="", page=1):
@@ -64,7 +64,7 @@ def get_order(order_code):
                  selectinload(SalesOrder.items).selectinload(SalesOrderItem.variant).selectinload(ProductVariant.size),
                  selectinload(SalesOrder.items).selectinload(SalesOrderItem.variant).selectinload(ProductVariant.color),
                  selectinload(SalesOrder.status_history).selectinload(SalesOrderStatusHistory.changed_by),
-                 selectinload(SalesOrder.payments),
+                 selectinload(SalesOrder.payments), selectinload(SalesOrder.return_requests),
                  selectinload(SalesOrder.shipment).selectinload(Shipment.carrier)))
     if order is None:
         abort(404)

@@ -5,7 +5,7 @@ from flask_login import current_user
 from app.account import bp
 from app.account.routes import _form_int
 from app.constants import OrderStatus, PaymentMethod
-from app.services import address_service, order_service, payment_service
+from app.services import address_service, order_service, payment_service, return_service, review_service
 from app.services.errors import CheckoutError, OrderStateError
 from app.utils.decorators import customer_required
 
@@ -69,7 +69,10 @@ def orders():
 def order_detail(order_code):
     order = order_service.get_owned_order(current_user, order_code)
     return render_template("account/order_detail.html", order=order, can_cancel=order_service.can_customer_cancel(order),
-                           deadline=order_service.payment_deadline(order), online_enabled=online_payment_enabled())
+                           deadline=order_service.payment_deadline(order), online_enabled=online_payment_enabled(),
+                           return_blocker=return_service.request_blocker(order),
+                           return_deadline=return_service.return_deadline(order) if order.status == OrderStatus.COMPLETED else None,
+                           can_review=order.status in review_service.REVIEWABLE_STATUSES)
 
 
 @bp.route("/orders/<order_code>/cancel", methods=["POST"])

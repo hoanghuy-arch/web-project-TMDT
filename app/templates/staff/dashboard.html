@@ -27,7 +27,10 @@
             <li class="mb-1"><span class="badge text-bg-info">{{ c.get('PENDING_CONFIRM', 0) }}</span> đơn chờ xác nhận</li>
             <li class="mb-1"><span class="badge text-bg-primary">{{ c.get('CONFIRMED', 0) }}</span> đơn đã xác nhận, chờ đóng gói</li>
             <li class="mb-1"><span class="badge text-bg-primary">{{ c.get('PACKING', 0) }}</span> đơn đang đóng gói, chờ bàn giao</li>
-            <li><span class="badge text-bg-primary">{{ c.get('SHIPPING', 0) }}</span> đơn đang giao</li>
+            <li class="mb-1"><span class="badge text-bg-primary">{{ c.get('SHIPPING', 0) }}</span> đơn đang giao</li>
+            {% if current_user.has_permission('return.handle') %}
+            <li><a href="{{ url_for('staff.returns', status='PENDING') }}" class="text-decoration-none"><span class="badge {{ 'text-bg-warning' if stats.returns_pending else 'text-bg-secondary' }}">{{ stats.returns_pending }}</span> yêu cầu đổi trả chờ xử lý</a></li>
+            {% endif %}
           </ul>
         </div></div>
       </div>
@@ -36,7 +39,9 @@
           <h2 class="h6">Tồn kho</h2>
           <p class="mb-1"><span class="badge {{ 'text-bg-danger' if stats.low_stock else 'text-bg-success' }}">{{ stats.low_stock }}</span>
             biến thể sắp hết hàng (còn từ {{ stats.low_stock_threshold }} sản phẩm trở xuống)</p>
-          <p class="small text-muted mb-0">Chi tiết tồn kho và phiếu nhập có ở các mục tiếp theo của khu vực nhân viên.</p>
+          {% if current_user.has_permission('stock.view') %}
+          <a href="{{ url_for('staff.stock', low=1) }}" class="small">Xem các biến thể sắp hết hàng</a>
+          {% endif %}
         </div></div>
       </div>
     </div>

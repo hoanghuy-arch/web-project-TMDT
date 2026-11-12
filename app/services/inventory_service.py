@@ -74,3 +74,38 @@ def issue_for_order(order, actor=None, note="Xuất kho khi bàn giao vận chuy
             product_variant_id=item.product_variant_id, sales_order_id=order.id,
             created_by_account_id=actor.id if actor else None, transaction_type=StockTxType.ISSUE,
             stock_delta=-item.quantity, reserved_delta=-item.quantity, note=note))
+
+
+# ------------------------------------------------------------------ cộng/trừ tồn kho theo nguồn
+def _change_stock(variant_id, delta, tx_type, actor, note, **source):
+    """Đổi stock_quantity một lượng delta (âm hoặc dương) và ghi sổ kho. Không bao giờ để tồn kho nhỏ hơn
+    lượng đang giữ (điều kiện nằm trong chính câu UPDATE; CHECK của DB là chốt chặn cuối)."""
+    result = db.session.execute(
+        update(ProductVariant)
+        .where(ProductVariant.id == variant_id,
+               ProductVariant.stock_quantity + delta >= ProductVariant.reserved_quantity,
+               ProductVariant.stock_quantity + delta >= 0)
+        .values(stock_quantity=ProductVariant.stock_quantity + delta)
+        .execution_options(synchronize_session=False))
+    if result.rowcount != 1:
+        raise InventoryError("Tồn kho sau điều chỉnh sẽ nhỏ hơn số lượng đang được giữ cho các đơn hàng.")
+    db.session.add(StockTransaction(
+        product_variant_id=variant_id, created_by_account_id=actor.id if actor else None,
+        transaction_type=tx_type, stock_delta=delta, reserved_delta=0, note=note, **source))
+
+
+def receive_receipt_item(receipt_item, quantity, actor):
+    """Nhập kho theo phiếu nhập: chỉ số lượng THỰC NHẬN được cộng vào tồn kho."""
+    _change_stock(receipt_item.product_variant_id, quantity, StockTxType.RECEIPT, actor,
+                  f"Nhập kho theo phiếu {receipt_item.receipt.receipt_code}", stock_receipt_item_id=receipt_item.id)
+
+
+def receive_return_item(return_item, quantity, actor):
+    """Hàng đổi trả đã nhận và kiểm tra đủ điều kiện bán lại thì cộng lại tồn kho."""
+    _change_stock(return_item.order_item.product_variant_id, quantity, StockTxType.RETURN_IN, actor,
+                  f"Nhập lại hàng đổi trả #{return_item.return_request_id}", return_item_id=return_item.id)
+
+
+def adjust_stock(variant_id, delta, actor, reason):
+    """Điều chỉnh thủ công (kiểm kê, hàng hỏng/mất...), bắt buộc có lý do."""
+    _change_stock(variant_id, delta, StockTxType.ADJUST, actor, reason)

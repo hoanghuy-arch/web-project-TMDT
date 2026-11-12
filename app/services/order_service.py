@@ -16,7 +16,7 @@ from sqlalchemy.orm import selectinload
 from app.constants import (CUSTOMER_CANCELLABLE_STATUSES, ROLE_CUSTOMER, STAFF_CANCELLABLE_STATUSES,
                            OrderStatus, PaymentMethod, PaymentStatus, can_transition)
 from app.extensions import db
-from app.models import (Address, AppSetting, Payment, ProductVariant, SalesOrder, SalesOrderItem,
+from app.models import (Address, AppSetting, Payment, ProductVariant, ReturnRequest, SalesOrder, SalesOrderItem,
                         SalesOrderStatusHistory)
 from app.models.base import utcnow
 from app.services import (address_service, audit_service, cart_service, inventory_service, promotion_service,
@@ -272,8 +272,10 @@ def get_owned_order(account, order_code):
                  .selectinload(ProductVariant.size),
                  selectinload(SalesOrder.items).selectinload(SalesOrderItem.variant)
                  .selectinload(ProductVariant.color),
+                 selectinload(SalesOrder.items).selectinload(SalesOrderItem.review),
                  selectinload(SalesOrder.status_history), selectinload(SalesOrder.payments),
-                 selectinload(SalesOrder.shipment)))
+                 selectinload(SalesOrder.shipment),
+                 selectinload(SalesOrder.return_requests).selectinload(ReturnRequest.items)))
     if order is None:
         abort(404)
     return order

@@ -5,6 +5,7 @@ from app.constants import DiscountType, EntityStatus, PaymentMethod
 from app.extensions import db
 from app.models import Address, CartItem, Promotion
 from app.models.base import utcnow
+from app.services import fulfillment_service as fs
 from app.services import order_service
 
 COD, VNPAY = PaymentMethod.COD, PaymentMethod.VNPAY
@@ -46,3 +47,24 @@ def place(acc, addr, method=COD, promo="", note=None):
 def refresh(*objs):
     for o in objs:
         db.session.refresh(o)
+
+
+def new_order(buyer, shop, qty=2, stock=10, price=250000, name="Áo A"):
+    """Tạo đơn COD mới từ một sản phẩm mới. Trả về (đơn, biến thể)."""
+    acc, addr = buyer
+    v = make_variant(shop, name, price, stock)
+    put_in_cart(acc, [(v, qty)])
+    return place(acc, addr), v
+
+
+def advance(order, actor, carrier, *steps):
+    """Đẩy đơn qua các bước xử lý: confirm, pack, ship, deliver."""
+    for step in steps:
+        if step == "confirm":
+            fs.confirm_order(order, actor)
+        elif step == "pack":
+            fs.start_packing(order, actor)
+        elif step == "ship":
+            fs.ship_order(order, actor, carrier.id, f"TRK{order.id:05d}")
+        elif step == "deliver":
+            fs.mark_delivered(order, actor)

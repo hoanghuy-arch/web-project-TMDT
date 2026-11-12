@@ -5,7 +5,7 @@ import pytest
 from app import create_app
 from app.constants import ROLE_ADMIN, ROLE_CUSTOMER, ROLE_STAFF, EntityStatus, Perm
 from app.extensions import db
-from app.models import (Account, Category, Color, Permission, Product, ProductVariant, Province, Role,
+from app.models import (Account, Carrier, Category, Color, Permission, Product, ProductVariant, Province, Role,
                         ShippingFeeRule, Size, Ward)
 from app.models.base import utcnow
 
@@ -142,3 +142,12 @@ def staff(make_account, staff_perms, login):
     acc = make_account(email="nv@test.com", role=ROLE_STAFF, full_name="Nhân Viên A")
     login("nv@test.com")
     return acc
+
+
+@pytest.fixture()
+def carrier(app):
+    """(đơn vị vận chuyển đang hoạt động, đơn vị đã ngừng)."""
+    active, inactive = Carrier(name="GHN"), Carrier(name="Hãng cũ", is_active=False)
+    db.session.add_all([active, inactive])
+    db.session.commit()
+    return active, inactive

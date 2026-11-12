@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "_macros.html" import return_badge %}
+{% from "staff/_nav.html" import staff_nav with context %}
+{% from "shop/_pager.html" import pager %}
+{% block title %}Đổi trả{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ staff_nav('returns') }}</div>
+  <div class="col-lg-9">
+    <h1 class="h4 mb-3">Yêu cầu đổi trả</h1>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <a href="{{ url_for('staff.returns') }}" class="btn btn-sm {{ 'btn-dark' if not status else 'btn-outline-secondary' }}">Tất cả</a>
+      {% for code, label in labels.items() if counts.get(code) %}
+        <a href="{{ url_for('staff.returns', status=code) }}" class="btn btn-sm {{ 'btn-dark' if status == code else 'btn-outline-secondary' }}">{{ label }} ({{ counts[code] }})</a>
+      {% endfor %}
+    </div>
+    {% if requests %}
+    <div class="card border-0 shadow-sm"><div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light"><tr><th>#</th><th>Đơn hàng</th><th>Khách hàng</th><th>Ngày gửi</th><th>Số lượng</th><th>Trạng thái</th></tr></thead>
+        <tbody>
+        {% for r in requests %}
+          <tr>
+            <td><a href="{{ url_for('staff.return_detail', return_id=r.id) }}" class="fw-semibold text-decoration-none">#{{ r.id }}</a></td>
+            <td>{{ r.order.order_code }}</td>
+            <td>{{ r.order.account.full_name }}</td>
+            <td class="small">{{ r.created_at | dt }}</td>
+            <td>{{ r['items'] | sum(attribute='quantity') }}</td>
+            <td>{{ return_badge(r.status) }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+    {{ pager(pagination, list_url) }}
+    {% else %}
+      <div class="text-center py-5 border rounded-3 bg-light text-muted">Không có yêu cầu đổi trả nào.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -41,7 +41,8 @@ class StockReceipt(db.Model):
 
     supplier = db.relationship("Supplier", back_populates="receipts")
     created_by = db.relationship("Account")
-    items = db.relationship("StockReceiptItem", back_populates="receipt", cascade="all, delete-orphan")  # R30
+    items = db.relationship("StockReceiptItem", back_populates="receipt", cascade="all, delete-orphan",
+                            order_by="StockReceiptItem.id")                                                 # R30
 
     __table_args__ = (
         db.CheckConstraint(in_list("status", ReceiptStatus.ALL), name="status_valid"),

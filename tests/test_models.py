@@ -193,7 +193,7 @@ def test_payment_status_check(app, base_data):
 
 def test_promotion_period_check(app):
     now = utcnow()
-    db.session.add(Promotion(code="X", name="X", discount_type="PERCENT", discount_value=10,
+    db.session.add(Promotion(code="X", discount_type="PERCENT", discount_value=10,
                              start_at=now, end_at=now - timedelta(days=1)))
     with pytest.raises(IntegrityError):
         db.session.commit()

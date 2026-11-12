@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "account/_nav.html" import account_nav with context %}
+{% block title %}Đánh giá sản phẩm{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ account_nav('orders') }}</div>
+  <div class="col-lg-9">
+    <a href="{{ url_for('account.order_detail', order_code=order.order_code) }}" class="small text-decoration-none">&larr; Đơn {{ order.order_code }}</a>
+    <h1 class="h4 mt-1 mb-1">Đánh giá sản phẩm</h1>
+    <div class="text-muted mb-3">{{ item.variant.product.name }} &middot; {{ item.variant.size.name }}, {{ item.variant.color.name }}</div>
+    <form method="post" action="{{ url_for('account.review_new', order_code=order.order_code, item_id=item.id) }}" class="card border-0 shadow-sm"><div class="card-body">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="mb-3">
+        <div class="form-label">Mức độ hài lòng</div>
+        {% for n in range(1, 6) %}
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="rating" id="rating-{{ n }}" value="{{ n }}" {{ 'checked' if form.rating == n }} required>
+          <label class="form-check-label" for="rating-{{ n }}">{{ n }} <i class="bi bi-star-fill text-warning"></i></label>
+        </div>
+        {% endfor %}
+      </div>
+      <label for="comment" class="form-label">Nhận xét (không bắt buộc)</label>
+      <textarea name="comment" id="comment" rows="4" maxlength="1000" class="form-control mb-3" placeholder="Chia sẻ trải nghiệm của bạn về chất liệu, kích cỡ, độ thoải mái...">{{ form.comment }}</textarea>
+      <div class="form-text mb-3">Đánh giá hiển thị công khai kèm tên đã được che bớt, và không thể sửa sau khi gửi.</div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-sz">Gửi đánh giá</button>
+        <a href="{{ url_for('account.order_detail', order_code=order.order_code) }}" class="btn btn-outline-secondary">Hủy</a>
+      </div>
+    </div></form>
+  </div>
+</div>
+{% endblock %}

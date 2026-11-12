@@ -21,7 +21,13 @@ RULES = {
     "staff": {"dashboard": "/staff/", "orders": "/staff/orders", "order_detail": "/staff/orders/<order_code>",
               "order_confirm": "/staff/orders/<order_code>/confirm", "order_pack": "/staff/orders/<order_code>/pack",
               "order_cancel": "/staff/orders/<order_code>/cancel", "order_ship": "/staff/orders/<order_code>/ship",
-              "order_deliver": "/staff/orders/<order_code>/deliver", "order_incident": "/staff/orders/<order_code>/incident"},
+              "order_deliver": "/staff/orders/<order_code>/deliver", "order_incident": "/staff/orders/<order_code>/incident",
+              "returns": "/staff/returns", "return_detail": "/staff/returns/<int:return_id>",
+              "return_approve": "/staff/returns/<int:return_id>/approve", "return_reject": "/staff/returns/<int:return_id>/reject",
+              "return_complete": "/staff/returns/<int:return_id>/complete", "stock": "/staff/stock",
+              "stock_detail": "/staff/stock/<int:variant_id>", "stock_adjust": "/staff/stock/<int:variant_id>/adjust",
+              "receipts": "/staff/receipts", "receipt_new": "/staff/receipts/new", "receipt_detail": "/staff/receipts/<int:receipt_id>",
+              "receipt_confirm": "/staff/receipts/<int:receipt_id>/confirm", "receipt_cancel": "/staff/receipts/<int:receipt_id>/cancel"},
     "account": {"profile": "/account/profile", "change_password": "/account/password",
                 "addresses": "/account/addresses", "address_new": "/account/addresses/new",
                 "address_edit": "/account/addresses/<int:address_id>/edit",
@@ -30,7 +36,8 @@ RULES = {
                 "wards_api": "/account/api/wards", "cart": "/account/cart", "cart_add": "/account/cart/add",
                 "cart_update": "/account/cart/update", "cart_remove": "/account/cart/remove",
                 "cart_clean": "/account/cart/clean", "checkout": "/account/checkout", "orders": "/account/orders",
-                "order_detail": "/account/orders/<order_code>", "order_cancel": "/account/orders/<order_code>/cancel"},
+                "order_detail": "/account/orders/<order_code>", "order_cancel": "/account/orders/<order_code>/cancel",
+                "return_new": "/account/orders/<order_code>/return", "review_new": "/account/orders/<order_code>/review/<int:item_id>"},
 }
 
 
@@ -74,7 +81,8 @@ class Customer:
 
 class Staff(Customer):
     role_code = "STAFF"
-    permissions = ("order.view", "order.process", "shipment.update")
+    # Bộ quyền mặc định của nhân viên (Perm.STAFF_DEFAULT)
+    permissions = ("order.view", "order.process", "shipment.update", "return.handle", "stock.view", "stock.receipt", "stock.issue")
 
 
 class Lbl:

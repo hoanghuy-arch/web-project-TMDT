@@ -16,3 +16,9 @@ def generate_order_code(now_utc):
 def generate_txn_ref(order_code):
     """Mã tham chiếu giao dịch gửi cổng thanh toán: duy nhất cho từng lần thanh toán (kể cả thử lại)."""
     return f"{order_code}{secrets.token_hex(3).upper()}"
+
+
+def generate_receipt_code(now_utc):
+    """PN + ngày (giờ Việt Nam, yyMMdd) + 4 ký tự ngẫu nhiên. Ví dụ: PN2611077K2Q."""
+    local = now_utc + _VN_OFFSET
+    return f"PN{local:%y%m%d}" + "".join(secrets.choice(_ALPHABET) for _ in range(4))

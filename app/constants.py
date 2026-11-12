@@ -136,6 +136,7 @@ class ReturnStatus:
     COMPLETED = "COMPLETED"   # đã nhận hàng, kiểm tra, hoàn tiền/nhập lại kho xong
     ALL = (PENDING, APPROVED, REJECTED, COMPLETED)
     LABELS = {PENDING: "Chờ xử lý", APPROVED: "Đã chấp nhận", REJECTED: "Từ chối", COMPLETED: "Hoàn tất"}
+    BADGES = {PENDING: "warning", APPROVED: "primary", REJECTED: "danger", COMPLETED: "success"}
 
 
 # --- Phiếu nhập kho ---
@@ -145,6 +146,7 @@ class ReceiptStatus:
     CANCELLED = "CANCELLED"
     ALL = (DRAFT, CONFIRMED, CANCELLED)
     LABELS = {DRAFT: "Nháp", CONFIRMED: "Đã nhập kho", CANCELLED: "Đã hủy"}
+    BADGES = {DRAFT: "warning", CONFIRMED: "success", CANCELLED: "secondary"}
 
 
 # --- Loại giao dịch kho (stock_transaction.type) ---
@@ -156,6 +158,8 @@ class StockTxType:
     RETURN_IN = "RETURN_IN"   # nhập lại do đổi trả: stock +n
     ADJUST = "ADJUST"         # điều chỉnh thủ công (kèm lý do): stock ±n
     ALL = (RESERVE, RELEASE, ISSUE, RECEIPT, RETURN_IN, ADJUST)
+    LABELS = {RESERVE: "Giữ hàng", RELEASE: "Nhả hàng giữ", ISSUE: "Xuất kho (bàn giao)", RECEIPT: "Nhập kho (phiếu nhập)",
+              RETURN_IN: "Nhập lại (đổi trả)", ADJUST: "Điều chỉnh thủ công"}
 
 
 # --- Quyền (permission) ---

@@ -27,3 +27,15 @@ class InventoryError(Exception):
 
 class FulfillmentError(Exception):
     """Dữ liệu xử lý đơn không hợp lệ (thiếu đơn vị vận chuyển, mã vận đơn sai/trùng, thiếu ghi chú...)."""
+
+
+class ReturnError(Exception):
+    """Yêu cầu đổi trả không hợp lệ hoặc không thể xử lý ở trạng thái hiện tại."""
+
+
+class ReviewError(Exception):
+    """Không thể đánh giá sản phẩm (chưa đủ điều kiện, đã đánh giá, dữ liệu sai)."""
+
+
+class StockError(Exception):
+    """Thao tác kho không hợp lệ (phiếu nhập, điều chỉnh tồn kho)."""

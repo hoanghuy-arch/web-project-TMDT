@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import order_badge, payment_badge %}
+{% from "_macros.html" import order_badge, payment_badge, return_badge, stars %}
 {% from "account/_nav.html" import account_nav with context %}
 {% block title %}Đơn {{ order.order_code }}{% endblock %}
 {% block content %}
@@ -30,7 +30,13 @@
             {% for item in order['items'] %}
             <div class="d-flex justify-content-between small mb-2">
               <div>{{ item.variant.product.name }}
-                <div class="text-muted">{{ item.variant.size.name }}, {{ item.variant.color.name }} &times; {{ item.quantity }} &middot; {{ item.unit_price | vnd }}</div></div>
+                <div class="text-muted">{{ item.variant.size.name }}, {{ item.variant.color.name }} &times; {{ item.quantity }} &middot; {{ item.unit_price | vnd }}</div>
+                {% if item.review %}
+                  <div class="mt-1">{{ stars(item.review.rating) }} <span class="text-muted">Bạn đã đánh giá</span></div>
+                {% elif can_review %}
+                  <a href="{{ url_for('account.review_new', order_code=order.order_code, item_id=item.id) }}" class="text-decoration-none"><i class="bi bi-star"></i> Đánh giá sản phẩm</a>
+                {% endif %}
+              </div>
               <div class="fw-semibold">{{ item.line_total | vnd }}</div>
             </div>
             {% endfor %}
@@ -66,6 +72,29 @@
             {% endif %}
           </div>
         </div>
+
+        {% if order.status in ['COMPLETED', 'RETURNING', 'RETURNED'] or order.return_requests %}
+        <div class="card shadow-sm border-0 mb-3">
+          <div class="card-body">
+            <h2 class="h6 mb-3">Đổi trả</h2>
+            {% for r in order.return_requests %}
+              <div class="small mb-3">
+                <div>Yêu cầu #{{ r.id }} {{ return_badge(r.status) }} <span class="text-muted">{{ r.created_at | dt }}</span></div>
+                <div class="text-muted">Lý do: {{ r.reason }}</div>
+                {% if r.resolution %}<div>Phản hồi: {{ r.resolution }}</div>{% endif %}
+              </div>
+            {% endfor %}
+            {% if order.status == 'COMPLETED' %}
+              {% if return_blocker %}
+                <div class="small text-muted">{{ return_blocker }}</div>
+              {% else %}
+                <a href="{{ url_for('account.return_new', order_code=order.order_code) }}" class="btn btn-outline-secondary btn-sm w-100">Yêu cầu đổi trả</a>
+                <div class="small text-muted mt-1">Hạn gửi yêu cầu: {{ return_deadline | dt('%d/%m/%Y') }}</div>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
 
         <div class="card shadow-sm border-0 mb-3">
           <div class="card-body">

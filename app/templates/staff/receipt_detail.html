@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_macros.html" import receipt_badge %}
+{% from "staff/_nav.html" import staff_nav with context %}
+{% block title %}Phiếu nhập {{ receipt.receipt_code }}{% endblock %}
+{% block content %}
+{% set can_edit = current_user.has_permission('stock.receipt') %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ staff_nav('receipts') }}</div>
+  <div class="col-lg-9">
+    <a href="{{ url_for('staff.receipts') }}" class="small text-decoration-none">&larr; Phiếu nhập kho</a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-1 mb-3">
+      <div>
+        <h1 class="h4 mb-0">Phiếu {{ receipt.receipt_code }}</h1>
+        <div class="small text-muted">{{ receipt.supplier.name }} &middot; lập {{ receipt.created_at | dt }} bởi {{ receipt.created_by.full_name }}
+          {% if receipt.confirmed_at %} &middot; nhập kho {{ receipt.confirmed_at | dt }}{% endif %}</div>
+      </div>
+      <div>{{ receipt_badge(receipt.status) }}</div>
+    </div>
+    {% if receipt.note %}<div class="alert alert-light border small">{{ receipt.note }}</div>{% endif %}
+
+    {% set draft = receipt.status == 'DRAFT' and can_edit %}
+    {% if draft %}<form method="post" action="{{ url_for('staff.receipt_confirm', receipt_id=receipt.id) }}" class="card border-0 shadow-sm mb-3"><div class="card-body">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% else %}<div class="card border-0 shadow-sm mb-3"><div class="card-body">{% endif %}
+      <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+        <thead><tr><th>Sản phẩm</th><th>SKU</th><th class="text-end">Đặt nhập</th><th class="text-end">Đơn giá</th>
+          <th class="text-end" style="width: 150px;">Thực nhận</th></tr></thead>
+        <tbody>
+        {% for i in receipt['items'] %}
+          <tr>
+            <td>{{ i.variant.product.name }}<div class="small text-muted">{{ i.variant.size.name }} &middot; {{ i.variant.color.name }}</div></td>
+            <td class="small">{{ i.variant.sku }}</td>
+            <td class="text-end">{{ i.ordered_quantity }}</td>
+            <td class="text-end">{{ i.unit_cost | vnd }}</td>
+            <td class="text-end">
+              {% if draft %}<input type="number" name="received_{{ i.id }}" min="0" value="{{ i.ordered_quantity }}" class="form-control form-control-sm text-end" required>
+              {% else %}{{ i.received_quantity }}{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+        {% if receipt.status == 'CONFIRMED' %}
+        <tfoot><tr><td colspan="4" class="text-end fw-semibold">Giá trị nhập (thực nhận)</td><td class="text-end fw-bold">{{ receipt.total_cost | vnd }}</td></tr></tfoot>
+        {% endif %}
+      </table></div>
+      {% if draft %}
+      <button type="submit" class="btn btn-success btn-sm mt-3" onclick="return confirm('Xác nhận nhập kho? Số lượng thực nhận sẽ được cộng vào tồn kho.');"><i class="bi bi-box-arrow-in-down"></i> Xác nhận nhập kho</button>
+      {% endif %}
+    {% if draft %}</div></form>{% else %}</div></div>{% endif %}
+
+    {% if draft %}
+    <form method="post" action="{{ url_for('staff.receipt_cancel', receipt_id=receipt.id) }}" onsubmit="return confirm('Hủy phiếu nhập này?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-outline-danger btn-sm">Hủy phiếu nhập</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

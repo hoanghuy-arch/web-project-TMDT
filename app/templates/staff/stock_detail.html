@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "staff/_nav.html" import staff_nav with context %}
+{% block title %}Tồn kho {{ variant.sku }}{% endblock %}
+{% block content %}
+{% set avail = variant.available_quantity %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ staff_nav('stock') }}</div>
+  <div class="col-lg-9">
+    <a href="{{ url_for('staff.stock') }}" class="small text-decoration-none">&larr; Tồn kho</a>
+    <h1 class="h4 mt-1">{{ variant.product.name }}</h1>
+    <div class="text-muted mb-3">{{ variant.size.name }} &middot; {{ variant.color.name }} &middot; SKU {{ variant.sku }}</div>
+
+    <div class="row row-cols-3 g-3 mb-3">
+      <div class="col"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Tồn kho</div><div class="fs-3 fw-bold">{{ variant.stock_quantity }}</div></div></div></div>
+      <div class="col"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Đang giữ cho đơn</div><div class="fs-3 fw-bold">{{ variant.reserved_quantity }}</div></div></div></div>
+      <div class="col"><div class="card border-0 shadow-sm"><div class="card-body"><div class="small text-muted">Khả dụng</div>
+        <div class="fs-3 fw-bold {{ 'text-danger' if avail <= 0 else ('text-warning' if avail <= threshold else 'text-success') }}">{{ avail }}</div></div></div></div>
+    </div>
+
+    {% if current_user.has_permission('stock.adjust') %}
+    <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+      <h2 class="h6 mb-2">Điều chỉnh tồn kho thủ công</h2>
+      <form method="post" action="{{ url_for('staff.stock_adjust', variant_id=variant.id) }}" class="row g-2 align-items-end">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="col-md-3">
+          <label for="delta" class="form-label small mb-1">Chênh lệch (+/-)</label>
+          <input type="number" name="delta" id="delta" class="form-control form-control-sm" required placeholder="ví dụ -2 hoặc 10">
+        </div>
+        <div class="col-md-6">
+          <label for="reason" class="form-label small mb-1">Lý do (bắt buộc)</label>
+          <input type="text" name="reason" id="reason" class="form-control form-control-sm" maxlength="500" required placeholder="Kiểm kê, hàng hỏng, mất hàng...">
+        </div>
+        <div class="col-md-3"><button class="btn btn-outline-dark btn-sm w-100" type="submit" onclick="return confirm('Điều chỉnh tồn kho? Thao tác được ghi nhật ký.');">Điều chỉnh</button></div>
+      </form>
+      <div class="form-text">Tồn kho sau điều chỉnh không được nhỏ hơn số lượng đang giữ cho các đơn chưa bàn giao.</div>
+    </div></div>
+    {% endif %}
+
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <h2 class="h6 mb-3">Biến động gần đây</h2>
+      {% if transactions %}
+      <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+        <thead><tr><th>Thời gian</th><th>Loại</th><th class="text-end">Tồn kho</th><th class="text-end">Giữ</th><th>Ghi chú</th><th>Người thực hiện</th></tr></thead>
+        <tbody>
+        {% for t in transactions %}
+          <tr>
+            <td class="small">{{ t.created_at | dt }}</td>
+            <td class="small">{{ tx_labels.get(t.transaction_type, t.transaction_type) }}</td>
+            <td class="text-end {{ 'text-success' if t.stock_delta > 0 else ('text-danger' if t.stock_delta < 0 else 'text-muted') }}">{{ '%+d' % t.stock_delta if t.stock_delta else 0 }}</td>
+            <td class="text-end {{ 'text-muted' if not t.reserved_delta }}">{{ '%+d' % t.reserved_delta if t.reserved_delta else 0 }}</td>
+            <td class="small">{{ t.note or '' }}</td>
+            <td class="small">{{ t.created_by.full_name if t.created_by else 'Hệ thống' }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+      {% else %}<div class="text-muted small">Chưa có biến động nào.</div>{% endif %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}

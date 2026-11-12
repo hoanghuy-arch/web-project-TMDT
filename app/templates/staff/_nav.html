@@ -1,9 +1,16 @@
-{# Menu bên trái khu vực nhân viên. active: dashboard | orders #}
+{# Menu bên trái khu vực nhân viên. active: dashboard | orders | returns | stock | receipts #}
 {% macro staff_nav(active) -%}
 <div class="list-group shadow-sm mb-3">
   <a href="{{ url_for('staff.dashboard') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'dashboard' }}"><i class="bi bi-speedometer2"></i> Tổng quan</a>
   {% if current_user.has_permission('order.view') %}
   <a href="{{ url_for('staff.orders') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'orders' }}"><i class="bi bi-receipt"></i> Đơn hàng</a>
+  {% endif %}
+  {% if current_user.has_permission('return.handle') %}
+  <a href="{{ url_for('staff.returns') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'returns' }}"><i class="bi bi-arrow-repeat"></i> Đổi trả</a>
+  {% endif %}
+  {% if current_user.has_permission('stock.view') %}
+  <a href="{{ url_for('staff.stock') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'stock' }}"><i class="bi bi-boxes"></i> Tồn kho</a>
+  <a href="{{ url_for('staff.receipts') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'receipts' }}"><i class="bi bi-truck-flatbed"></i> Phiếu nhập kho</a>
   {% endif %}
 </div>
 {%- endmacro %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "staff/_nav.html" import staff_nav with context %}
+{% block title %}Lập phiếu nhập kho{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ staff_nav('receipts') }}</div>
+  <div class="col-lg-9">
+    <a href="{{ url_for('staff.receipts') }}" class="small text-decoration-none">&larr; Phiếu nhập kho</a>
+    <h1 class="h4 mt-1 mb-3">Lập phiếu nhập kho</h1>
+    <form method="post" action="{{ url_for('staff.receipt_new') }}" class="card border-0 shadow-sm"><div class="card-body">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="row g-3 mb-3">
+        <div class="col-md-5">
+          <label for="supplier_id" class="form-label">Nhà cung cấp</label>
+          <select name="supplier_id" id="supplier_id" class="form-select" required>
+            <option value="">-- Chọn --</option>
+            {% for s in suppliers %}<option value="{{ s.id }}" {{ 'selected' if supplier_id == s.id }}>{{ s.name }}</option>{% endfor %}
+          </select>
+          {% if not suppliers %}<div class="small text-danger mt-1">Chưa có nhà cung cấp đang hoạt động. Quản trị viên cần thêm nhà cung cấp.</div>{% endif %}
+        </div>
+        <div class="col-md-7">
+          <label for="note" class="form-label">Ghi chú</label>
+          <input type="text" name="note" id="note" class="form-control" maxlength="500" value="{{ note }}">
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle" id="receipt-lines" data-max-lines="50">
+          <thead><tr><th>Mã SKU</th><th style="width: 140px;">SL đặt nhập</th><th style="width: 170px;">Đơn giá nhập (₫)</th></tr></thead>
+          <tbody>
+          {% for r in rows %}
+            <tr class="receipt-row">
+              <td><input type="text" name="sku_{{ loop.index }}" value="{{ r.sku }}" maxlength="50" class="form-control form-control-sm" placeholder="Ví dụ: AO-M-DEN"></td>
+              <td><input type="number" name="qty_{{ loop.index }}" value="{{ r.qty }}" min="1" class="form-control form-control-sm"></td>
+              <td><input type="text" inputmode="numeric" name="cost_{{ loop.index }}" value="{{ r.cost }}" class="form-control form-control-sm"></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-outline-secondary btn-sm mb-3" id="add-line"><i class="bi bi-plus"></i> Thêm dòng</button>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-sz">Lưu phiếu nhập (nháp)</button>
+        <a href="{{ url_for('staff.receipts') }}" class="btn btn-outline-secondary">Hủy</a>
+      </div>
+      <div class="form-text mt-2">Phiếu mới ở trạng thái nháp, chưa ảnh hưởng tồn kho. Khi hàng về, nhập số lượng thực nhận để xác nhận nhập kho.</div>
+    </div></form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/receipt.js') }}"></script>{% endblock %}

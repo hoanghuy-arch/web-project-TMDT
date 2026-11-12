@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import order_badge, payment_badge %}
+{% from "_macros.html" import order_badge, payment_badge, return_badge %}
 {% from "staff/_nav.html" import staff_nav with context %}
 {% block title %}Đơn {{ order.order_code }}{% endblock %}
 {% block content %}
@@ -78,7 +78,7 @@
           </form>
 
         {% elif status in ['COMPLETED', 'RETURNING', 'RETURNED', 'CANCELLED'] %}
-          <div class="text-muted small">Đơn ở trạng thái cuối của quy trình xử lý, không còn thao tác ở bước này.</div>
+          <div class="text-muted small">Đơn ở trạng thái cuối của quy trình xử lý giao hàng, không còn thao tác ở bước này. Yêu cầu đổi trả (nếu có) được xử lý ở mục Đổi trả.</div>
         {% else %}
           <div class="text-muted small">Bạn không có quyền thực hiện thao tác cho trạng thái này.</div>
         {% endif %}
@@ -156,6 +156,20 @@
             <div class="small">Mã vận đơn: <strong>{{ order.shipment.tracking_code }}</strong></div>
             <div class="small text-muted">Bàn giao: {{ order.shipment.shipped_at | dt }}</div>
             {% if order.shipment.delivered_at %}<div class="small text-success">Giao thành công: {{ order.shipment.delivered_at | dt }}</div>{% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if order.return_requests %}
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body">
+            <h2 class="h6 mb-2">Đổi trả</h2>
+            {% for r in order.return_requests %}
+              <div class="small mb-1">
+                {% if current_user.has_permission('return.handle') %}<a href="{{ url_for('staff.return_detail', return_id=r.id) }}">Yêu cầu #{{ r.id }}</a>{% else %}Yêu cầu #{{ r.id }}{% endif %}
+                {{ return_badge(r.status) }} <span class="text-muted">{{ r.created_at | dt }}</span>
+              </div>
+            {% endfor %}
           </div>
         </div>
         {% endif %}

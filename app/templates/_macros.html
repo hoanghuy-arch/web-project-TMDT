@@ -41,3 +41,12 @@
 {% macro payment_badge(status) -%}
   <span class="badge text-bg-{{ status | payment_status_badge }}">{{ status | payment_status_label }}</span>
 {%- endmacro %}
+
+
+{% macro return_badge(status) -%}
+  <span class="badge text-bg-{{ status | return_status_badge }}">{{ status | return_status_label }}</span>
+{%- endmacro %}
+
+{% macro receipt_badge(status) -%}
+  <span class="badge text-bg-{{ status | receipt_status_badge }}">{{ status | receipt_status_label }}</span>
+{%- endmacro %}

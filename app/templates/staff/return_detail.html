@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% from "_macros.html" import return_badge, order_badge, payment_badge %}
+{% from "staff/_nav.html" import staff_nav with context %}
+{% block title %}Đổi trả #{{ req.id }}{% endblock %}
+{% block content %}
+{% set order = req.order %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ staff_nav('returns') }}</div>
+  <div class="col-lg-9">
+    <a href="{{ url_for('staff.returns') }}" class="small text-decoration-none">&larr; Danh sách đổi trả</a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-1 mb-3">
+      <div>
+        <h1 class="h4 mb-0">Yêu cầu đổi trả #{{ req.id }}</h1>
+        <div class="small text-muted">Gửi lúc {{ req.created_at | dt }} &middot; Đơn
+          {% if current_user.has_permission('order.view') %}<a href="{{ url_for('staff.order_detail', order_code=order.order_code) }}">{{ order.order_code }}</a>{% else %}{{ order.order_code }}{% endif %}
+          {{ order_badge(order.status) }}</div>
+      </div>
+      <div>{{ return_badge(req.status) }}</div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3 border-start border-4 border-warning"><div class="card-body">
+      <h2 class="h6 mb-3">Xử lý</h2>
+
+      {% if req.status == 'PENDING' %}
+        <div class="small text-muted mb-3">Thời hạn đổi trả cấu hình: {{ window_days }} ngày kể từ khi nhận hàng. Chấp nhận thì đơn chuyển sang "Đang đổi trả".</div>
+        <form method="post" action="{{ url_for('staff.return_approve', return_id=req.id) }}" class="mb-3">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="input-group input-group-sm">
+            <input type="text" name="note" class="form-control" maxlength="400" placeholder="Ghi chú cho khách (không bắt buộc), ví dụ hướng dẫn gửi hàng về">
+            <button class="btn btn-sz" type="submit"><i class="bi bi-check2-circle"></i> Chấp nhận</button>
+          </div>
+        </form>
+        <form method="post" action="{{ url_for('staff.return_reject', return_id=req.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="input-group input-group-sm">
+            <input type="text" name="reason" class="form-control" maxlength="500" required placeholder="Lý do từ chối (bắt buộc)">
+            <button class="btn btn-outline-danger" type="submit">Từ chối</button>
+          </div>
+        </form>
+
+      {% elif req.status == 'APPROVED' %}
+        <div class="small text-muted mb-3">Nhận hàng trả về, kiểm tra rồi nhập số lượng ĐẠT điều kiện bán lại. Chỉ số lượng đạt được cộng lại tồn kho.</div>
+        <form method="post" action="{{ url_for('staff.return_complete', return_id=req.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <table class="table table-sm align-middle">
+            <thead><tr><th>Sản phẩm</th><th class="text-end">Khách trả</th><th style="width: 130px;">Số lượng đạt</th></tr></thead>
+            <tbody>
+            {% for ri in req['items'] %}
+              <tr>
+                <td>{{ ri.order_item.variant.product.name }}<div class="small text-muted">SKU {{ ri.order_item.variant.sku }} &middot; {{ ri.order_item.unit_price | vnd }}</div></td>
+                <td class="text-end">{{ ri.quantity }}</td>
+                <td><input type="number" name="accepted_{{ ri.id }}" min="0" max="{{ ri.quantity }}" value="{{ ri.quantity }}" class="form-control form-control-sm" required></td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label for="refund_amount" class="form-label small mb-1">Số tiền đã hoàn cho khách (₫, để trống nếu chưa hoàn)</label>
+              <input type="text" inputmode="numeric" name="refund_amount" id="refund_amount" class="form-control form-control-sm" placeholder="Gợi ý: {{ suggested | vnd }}">
+              <div class="form-text">Gợi ý = số lượng đạt &times; đơn giá, chưa gồm phí vận chuyển. Chỉ ghi nhận khi đơn đã thu tiền
+                {% if order.payment_status != 'PAID' %}<span class="text-danger">(đơn này hiện: {{ order.payment_status | payment_status_label }})</span>{% endif %}.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="note" class="form-label small mb-1">Ghi chú xử lý</label>
+              <input type="text" name="note" id="note" class="form-control form-control-sm" maxlength="300">
+            </div>
+          </div>
+          <button class="btn btn-success btn-sm mt-3" type="submit" onclick="return confirm('Hoàn tất đổi trả? Hàng đạt sẽ được cộng lại tồn kho.');"><i class="bi bi-box-arrow-in-down"></i> Hoàn tất đổi trả</button>
+        </form>
+
+      {% else %}
+        <div class="small text-muted">Yêu cầu đã được xử lý xong.</div>
+      {% endif %}
+    </div></div>
+
+    <div class="card border-0 shadow-sm mb-3"><div class="card-body">
+      <h2 class="h6 mb-3">Nội dung yêu cầu</h2>
+      <div class="small text-muted">Khách hàng</div>
+      <div class="mb-2">{{ order.account.full_name }} &middot; {{ order.account.email }}</div>
+      <div class="small text-muted">Lý do của khách</div>
+      <div class="mb-3" style="white-space: pre-line;">{{ req.reason }}</div>
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Sản phẩm</th><th class="text-end">Đã mua</th><th class="text-end">Trả</th><th class="text-end">Đạt</th></tr></thead>
+        <tbody>
+        {% for ri in req['items'] %}
+          <tr>
+            <td>{{ ri.order_item.variant.product.name }}</td>
+            <td class="text-end">{{ ri.order_item.quantity }}</td>
+            <td class="text-end">{{ ri.quantity }}</td>
+            <td class="text-end">{{ ri.accepted_quantity if ri.accepted_quantity is not none else '—' }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+
+    {% if req.resolution %}
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <h2 class="h6 mb-2">Kết quả xử lý</h2>
+      <div>{{ req.resolution }}</div>
+      <div class="small text-muted mt-1">{{ req.handled_by.full_name if req.handled_by else '' }}{% if req.resolved_at %} &middot; {{ req.resolved_at | dt }}{% endif %}</div>
+      <div class="small mt-1">Thanh toán của đơn: {{ payment_badge(order.payment_status) if order.payment_status }}</div>
+    </div></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from flask import url_for
 
-from app.constants import ROLE_LABELS, OrderStatus, PaymentStatus
+from app.constants import ROLE_LABELS, OrderStatus, PaymentStatus, ReceiptStatus, ReturnStatus
 
 VN_OFFSET = timedelta(hours=7)  # DB lưu UTC, hiển thị giờ Việt Nam
 
@@ -35,6 +35,22 @@ def payment_status_badge(code):
     return PaymentStatus.BADGES.get(code, "secondary")
 
 
+def return_status_label(code):
+    return ReturnStatus.LABELS.get(code, code)
+
+
+def return_status_badge(code):
+    return ReturnStatus.BADGES.get(code, "secondary")
+
+
+def receipt_status_label(code):
+    return ReceiptStatus.LABELS.get(code, code)
+
+
+def receipt_status_badge(code):
+    return ReceiptStatus.BADGES.get(code, "secondary")
+
+
 def role_label(code):
     return ROLE_LABELS.get(code, code)
 
@@ -60,7 +76,9 @@ def mask_name(full_name):
 
 def register_filters(app):
     app.jinja_env.filters.update(
-        vnd=vnd, dt=dt, role_label=role_label, image_url=image_url, mask_name=mask_name,
+        vnd=vnd, dt=dt, role_label=role_label,
+        return_status_label=return_status_label, return_status_badge=return_status_badge,
+        receipt_status_label=receipt_status_label, receipt_status_badge=receipt_status_badge, image_url=image_url, mask_name=mask_name,
         order_status_label=order_status_label, order_status_badge=order_status_badge,
         payment_status_label=payment_status_label, payment_status_badge=payment_status_badge,
     )

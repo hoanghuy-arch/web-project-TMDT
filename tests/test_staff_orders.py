@@ -6,39 +6,12 @@ import pytest
 
 from app.constants import (ROLE_ADMIN, ROLE_STAFF, OrderStatus, PaymentStatus, Perm, StockTxType)
 from app.extensions import db
-from app.models import AuditLog, Carrier, Permission, Shipment, StockTransaction
+from app.models import AuditLog, Permission, Shipment, StockTransaction
 from app.models.base import utcnow
 from app.services import fulfillment_service as fs
 from app.services import order_service, staff_service
 
-from tests.helpers import VNPAY, make_variant, place, put_in_cart, refresh
-
-
-@pytest.fixture()
-def carrier(app):
-    active, inactive = Carrier(name="GHN"), Carrier(name="Hãng cũ", is_active=False)
-    db.session.add_all([active, inactive])
-    db.session.commit()
-    return active, inactive
-
-
-def new_order(buyer, shop, qty=2, stock=10, price=250000, name="Áo A"):
-    acc, addr = buyer
-    v = make_variant(shop, name, price, stock)
-    put_in_cart(acc, [(v, qty)])
-    return place(acc, addr), v
-
-
-def advance(order, actor, carrier, *steps):
-    for step in steps:
-        if step == "confirm":
-            fs.confirm_order(order, actor)
-        elif step == "pack":
-            fs.start_packing(order, actor)
-        elif step == "ship":
-            fs.ship_order(order, actor, carrier.id, f"TRK{order.id:05d}")
-        elif step == "deliver":
-            fs.mark_delivered(order, actor)
+from tests.helpers import VNPAY, advance, make_variant, new_order, place, put_in_cart, refresh
 
 
 def post(client, order, action, **data):
