@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% block title %}Phân quyền Vai trò - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('roles') }}</div>
+  <div class="col-lg-9">
+    <h1 class="h4 mb-4">Phân quyền Vai trò (RBAC)</h1>
+
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle"></i> <strong>Lưu ý:</strong> Vai trò <strong>Quản trị viên (ADMIN)</strong> luôn có toàn bộ quyền hệ thống; vai trò <strong>Khách hàng (CUSTOMER)</strong> không được gán quyền nhân viên. Bạn có thể tùy biến quyền hạn cho vai trò <strong>Nhân viên (STAFF)</strong> bên dưới.
+    </div>
+
+    {% for r in roles %}
+    {% if r.name == 'STAFF' %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+        <span>Bảng phân quyền cho vai trò: <span class="badge text-bg-info">NHÂN VIÊN (STAFF)</span></span>
+        <span class="small text-muted">{{ r.accounts | length }} tài khoản đang giữ vai trò này</span>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="role_id" value="{{ r.id }}">
+
+          {% set current_codes = r.permissions | map(attribute='code') | list %}
+          <div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
+            {% for p in permissions %}
+            <div class="col">
+              <div class="form-check p-2 rounded border bg-light">
+                <input class="form-check-input ms-0 me-2" type="checkbox" name="permissions" value="{{ p.code }}" id="perm_{{ p.id }}" {{ 'checked' if p.code in current_codes }}>
+                <label class="form-check-label" for="perm_{{ p.id }}">
+                  <div class="fw-bold">{{ perm_labels.get(p.code, p.code) }}</div>
+                  <code class="small text-muted">{{ p.code }}</code>
+                </label>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-shield-check"></i> Lưu phân quyền cho Nhân viên</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}

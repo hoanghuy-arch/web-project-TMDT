@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% from "_macros.html" import field, select %}
+{% block title %}{{ title }} - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('users') }}</div>
+  <div class="col-lg-9">
+    <div class="card border-0 shadow-sm col-md-8 mx-auto">
+      <div class="card-header bg-white fw-bold">{{ title }}</div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {{ field(form.full_name, placeholder="Họ và tên...") }}
+          {{ field(form.email, placeholder="email@sportzone.local") }}
+          {{ field(form.phone, placeholder="0912345678") }}
+          {{ select(form.role_id) }}
+          <div class="row g-3">
+            <div class="col-md-6">{{ field(form.password, placeholder="Mật khẩu tối thiểu 8 ký tự") }}</div>
+            <div class="col-md-6">{{ field(form.confirm_password, placeholder="Nhập lại mật khẩu") }}</div>
+          </div>
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">Quay lại danh sách</a>
+            <button type="submit" class="btn btn-primary">Tạo tài khoản</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

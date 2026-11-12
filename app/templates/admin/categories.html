@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% block title %}Quản lý Danh mục - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('categories') }}</div>
+  <div class="col-lg-9">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h4 mb-0">Quản lý Danh mục sản phẩm</h1>
+      <a href="{{ url_for('admin.category_create') }}" class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-lg"></i> Thêm danh mục mới
+      </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Tên danh mục</th>
+                <th>Slug (URL)</th>
+                <th>Danh mục cha</th>
+                <th>Trạng thái</th>
+                <th class="text-end">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in categories %}
+              <tr>
+                <td class="fw-bold">
+                  {% if c.parent_category_id %}
+                    <span class="text-muted me-2">└──</span>{{ c.name }}
+                  {% else %}
+                    <i class="bi bi-folder-fill text-warning me-1"></i> {{ c.name }}
+                  {% endif %}
+                </td>
+                <td><code>{{ c.slug }}</code></td>
+                <td>{{ c.parent.name if c.parent else '<span class="text-muted">Danh mục gốc</span>' | safe }}</td>
+                <td>
+                  <span class="badge text-bg-{{ 'success' if c.is_active else 'secondary' }}">
+                    {{ 'Hoạt động' if c.is_active else 'Tạm ngưng' }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <a href="{{ url_for('admin.category_edit', cat_id=c.id) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pencil"></i> Sửa
+                  </a>
+                  <form method="post" action="{{ url_for('admin.category_toggle', cat_id=c.id) }}" class="d-inline ms-1">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-{{ 'warning' if c.is_active else 'success' }}">
+                      {{ 'Khóa' if c.is_active else 'Mở' }}
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="5" class="text-center text-muted p-4">Chưa có danh mục nào.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

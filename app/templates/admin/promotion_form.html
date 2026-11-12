@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% from "_macros.html" import field, select %}
+{% block title %}{{ title }} - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('promotions') }}</div>
+  <div class="col-lg-9">
+    <div class="card border-0 shadow-sm col-md-9 mx-auto">
+      <div class="card-header bg-white fw-bold">{{ title }}</div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {{ field(form.code, placeholder="Ví dụ: HELLO2026, SALE50K") }}
+          <div class="row g-3">
+            <div class="col-md-6">{{ select(form.discount_type) }}</div>
+            <div class="col-md-6">{{ field(form.discount_value, placeholder="Nhập số % hoặc số tiền VND...") }}</div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">{{ field(form.min_order_value, placeholder="Đơn tối thiểu (VND)") }}</div>
+            <div class="col-md-6">{{ field(form.max_discount, placeholder="Mức giảm tối đa (chỉ cho %)") }}</div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">{{ field(form.start_at, placeholder="2026-11-01 00:00") }}</div>
+            <div class="col-md-6">{{ field(form.end_at, placeholder="2026-12-31 23:59") }}</div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">{{ field(form.usage_limit, placeholder="Để trống nếu không giới hạn") }}</div>
+            <div class="col-md-6">{{ select(form.status) }}</div>
+          </div>
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('admin.promotions') }}" class="btn btn-outline-secondary">Quay lại danh sách</a>
+            <button type="submit" class="btn btn-primary">Lưu mã khuyến mãi</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

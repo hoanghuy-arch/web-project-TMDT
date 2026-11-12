@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% block title %}Tham số Cấu hình Hệ thống - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('settings') }}</div>
+  <div class="col-lg-9">
+    <div class="card border-0 shadow-sm col-md-8 mx-auto">
+      <div class="card-header bg-white fw-bold">Cấu hình Tham số Hệ thống (FR-QT07)</div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Thời gian giữ hàng đơn Online (phút)</label>
+            <input type="number" name="payment_timeout_minutes" class="form-control" value="{{ settings.get('payment_timeout_minutes', 15) }}" min="5" max="120" required>
+            <div class="form-text">Đơn online quá thời gian này mà chưa thanh toán sẽ tự động bị hủy và nhả hàng giữ.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Thời hạn đổi trả sau khi nhận hàng (ngày)</label>
+            <input type="number" name="return_window_days" class="form-control" value="{{ settings.get('return_window_days', 7) }}" min="1" max="30" required>
+            <div class="form-text">Khách hàng chỉ được gửi yêu cầu đổi trả cho đơn 'Hoàn thành' trong vòng số ngày này.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold">Ngưỡng cảnh báo tồn kho sắp hết</label>
+            <input type="number" name="low_stock_threshold" class="form-control" value="{{ settings.get('low_stock_threshold', 5) }}" min="1" max="100" required>
+            <div class="form-text">Biến thể có số lượng khả dụng nhỏ hơn hoặc bằng ngưỡng này sẽ hiển thị cảnh báo đỏ trên trang quản lý kho.</div>
+          </div>
+
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-save"></i> Lưu tham số cấu hình
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

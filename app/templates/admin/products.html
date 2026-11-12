@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% block title %}Quản lý Sản phẩm - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('products') }}</div>
+  <div class="col-lg-9">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h4 mb-0">Quản lý Sản phẩm & Biến thể</h1>
+      <a href="{{ url_for('admin.product_create') }}" class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-lg"></i> Thêm sản phẩm mới
+      </a>
+    </div>
+
+    <!-- Bộ lọc tìm kiếm -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <form method="get" class="row g-2 align-items-center">
+          <div class="col-md-5">
+            <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="Tìm theo tên sản phẩm...">
+          </div>
+          <div class="col-md-4">
+            <select name="cat_id" class="form-select form-select-sm">
+              <option value="">-- Tất cả danh mục --</option>
+              {% for c in categories %}
+              <option value="{{ c.id }}" {{ 'selected' if cat_id == c.id }}>{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-sm btn-secondary flex-grow-1"><i class="bi bi-search"></i> Lọc</button>
+            <a href="{{ url_for('admin.products') }}" class="btn btn-sm btn-outline-secondary">Xóa</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Bảng danh sách sản phẩm -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Giá</th>
+                <th>Tồn / Biến thể</th>
+                <th>Trạng thái</th>
+                <th class="text-end">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in products %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    {% if p.primary_image %}
+                    <img src="{{ p.primary_image.url }}" class="rounded me-2 border" style="width: 45px; height: 45px; object-fit: cover;" alt="">
+                    {% else %}
+                    <div class="bg-light rounded me-2 border d-flex align-items-center justify-content-center text-muted" style="width: 45px; height: 45px;">
+                      <i class="bi bi-image"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                      <div class="fw-bold">{{ p.name }}</div>
+                      <code class="small text-muted">{{ p.slug }}</code>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ p.category.name if p.category else '-' }}</td>
+                <td class="fw-bold text-success">{{ p.price | vnd }}</td>
+                <td>
+                  <span class="badge text-bg-{{ 'success' if p.total_available > 0 else 'danger' }}">
+                    {{ p.total_available }} khả dụng
+                  </span>
+                  <div class="small text-muted">{{ p.variants | length }} biến thể</div>
+                </td>
+                <td>
+                  <span class="badge text-bg-{{ 'success' if p.is_active else 'secondary' }}">
+                    {{ 'Đang bán' if p.is_active else 'Ngừng bán' }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <a href="{{ url_for('admin.product_detail', product_id=p.id) }}" class="btn btn-sm btn-outline-primary" title="Xem chi tiết & Quản lý biến thể">
+                    <i class="bi bi-sliders"></i> Chi tiết
+                  </a>
+                  <a href="{{ url_for('admin.product_edit', product_id=p.id) }}" class="btn btn-sm btn-outline-secondary" title="Sửa thông tin">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form method="post" action="{{ url_for('admin.product_toggle', product_id=p.id) }}" class="d-inline ms-1">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-{{ 'warning' if p.is_active else 'success' }}" title="{{ 'Ngừng bán' if p.is_active else 'Mở bán lại' }}">
+                      {{ 'Ẩn' if p.is_active else 'Hiện' }}
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="6" class="text-center text-muted p-4">Không tìm thấy sản phẩm nào.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phân trang -->
+    {% if pagination and pagination.pages > 1 %}
+    <nav class="mt-4">
+      <ul class="pagination pagination-sm justify-content-center">
+        {% for p in pagination.iter_pages() %}
+          {% if p %}
+            <li class="page-item {{ 'active' if p == pagination.page }}"><a class="page-link" href="{{ url_for('admin.products', q=q, cat_id=cat_id, page=p) }}">{{ p }}</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </nav>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

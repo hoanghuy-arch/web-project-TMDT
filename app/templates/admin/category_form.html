@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% from "_macros.html" import field, select, checkbox %}
+{% block title %}{{ title }} - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('categories') }}</div>
+  <div class="col-lg-9">
+    <div class="card border-0 shadow-sm col-md-8 mx-auto">
+      <div class="card-header bg-white fw-bold">{{ title }}</div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {{ field(form.name, placeholder="Ví dụ: Áo thể thao nam") }}
+          {{ select(form.parent_category_id) }}
+          {{ checkbox(form.is_active) }}
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('admin.categories') }}" class="btn btn-outline-secondary">Quay lại</a>
+            <button type="submit" class="btn btn-primary">Lưu danh mục</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

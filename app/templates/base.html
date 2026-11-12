@@ -49,6 +49,9 @@
             <ul class="dropdown-menu dropdown-menu-end">
               <li><span class="dropdown-item-text small text-muted">{{ current_user.role_code | role_label }}</span></li>
               <li><hr class="dropdown-divider"></li>
+              {% if current_user.role_code == 'ADMIN' %}
+              <li><a class="dropdown-item fw-bold text-danger" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-shield-check"></i> Khu vực quản trị</a></li>
+              {% endif %}
               {% if current_user.role_code in ['STAFF', 'ADMIN'] %}
               <li><a class="dropdown-item" href="{{ url_for('staff.dashboard') }}">Khu vực nhân viên</a></li>
               {% endif %}

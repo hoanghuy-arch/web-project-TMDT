@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% from "_macros.html" import field, select %}
+{% block title %}{{ title }} - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('suppliers') }}</div>
+  <div class="col-lg-9">
+    <div class="card border-0 shadow-sm col-md-9 mx-auto">
+      <div class="card-header bg-white fw-bold">{{ title }}</div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {{ field(form.name, placeholder="Ví dụ: Xưởng may Thể thao Việt Nhật") }}
+          <div class="row g-3">
+            <div class="col-md-6">{{ field(form.contact_name, placeholder="Tên người đại diện...") }}</div>
+            <div class="col-md-6">{{ field(form.phone, placeholder="0912345678") }}</div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">{{ field(form.email, placeholder="contact@supplier.vn") }}</div>
+            <div class="col-md-6">{{ select(form.status) }}</div>
+          </div>
+          {{ field(form.address_detail, placeholder="Địa chỉ xưởng / văn phòng...") }}
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('admin.suppliers') }}" class="btn btn-outline-secondary">Quay lại danh sách</a>
+            <button type="submit" class="btn btn-primary">Lưu nhà cung cấp</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

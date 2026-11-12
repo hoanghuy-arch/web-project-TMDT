@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% block title %}Quản lý Nhà cung cấp - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('suppliers') }}</div>
+  <div class="col-lg-9">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h4 mb-0">Quản lý Nhà cung cấp (FR-QT04)</h1>
+      <a href="{{ url_for('admin.supplier_create') }}" class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-lg"></i> Thêm nhà cung cấp mới
+      </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Tên nhà cung cấp</th>
+                <th>Người liên hệ</th>
+                <th>Điện thoại</th>
+                <th>Email</th>
+                <th>Trạng thái</th>
+                <th class="text-end">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in suppliers %}
+              <tr>
+                <td class="fw-bold">{{ s.name }}</td>
+                <td>{{ s.contact_name or '-' }}</td>
+                <td>{{ s.phone }}</td>
+                <td>{{ s.email or '-' }}</td>
+                <td>
+                  <span class="badge text-bg-{{ 'success' if s.is_active else 'secondary' }}">
+                    {{ 'Đang hợp tác' if s.is_active else 'Ngừng hợp tác' }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <a href="{{ url_for('admin.supplier_edit', supplier_id=s.id) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pencil"></i> Sửa
+                  </a>
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="6" class="text-center text-muted p-4">Chưa có nhà cung cấp nào. Nhấn "Thêm nhà cung cấp mới" để tạo.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

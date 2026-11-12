@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% block title %}Báo cáo & Thống kê - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('reports') }}</div>
+  <div class="col-lg-9">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h4 mb-0">Báo cáo Doanh thu & Kinh doanh</h1>
+      <div class="btn-group btn-group-sm">
+        <a href="{{ url_for('admin.reports', days=7) }}" class="btn btn-outline-secondary {{ 'active' if days == 7 }}">7 ngày</a>
+        <a href="{{ url_for('admin.reports', days=30) }}" class="btn btn-outline-secondary {{ 'active' if days == 30 }}">30 ngày</a>
+        <a href="{{ url_for('admin.reports', days=90) }}" class="btn btn-outline-secondary {{ 'active' if days == 90 }}">90 ngày</a>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h6 text-muted">Tổng doanh thu hoàn thành trong {{ days }} ngày qua</h2>
+        <div class="fs-2 fw-bold text-success">{{ total_rev | vnd }}</div>
+      </div>
+    </div>
+
+    <!-- Bảng doanh thu theo ngày -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-bold">Chi tiết doanh thu theo ngày</div>
+      <div class="card-body p-0">
+        {% if daily_revenue %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr><th>Ngày</th><th class="text-end">Doanh thu</th></tr>
+            </thead>
+            <tbody>
+              {% for day, amount in daily_revenue.items() %}
+              <tr>
+                <td>{{ day }}</td>
+                <td class="text-end fw-bold text-success">{{ amount | vnd }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted">Chưa có đơn hàng hoàn thành trong khoảng thời gian này.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Top sản phẩm bán chạy -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-bold">Top 10 sản phẩm bán chạy nhất</div>
+      <div class="card-body p-0">
+        {% if best_sellers %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tên sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Giá bán</th>
+                <th class="text-end">Tổng số lượng đã bán</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p, sold in best_sellers %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td class="fw-bold">{{ p.name }}</td>
+                <td>{{ p.category.name if p.category else '-' }}</td>
+                <td>{{ p.price | vnd }}</td>
+                <td class="text-end fw-bold text-primary">{{ sold }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted">Chưa có dữ liệu bán hàng.</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

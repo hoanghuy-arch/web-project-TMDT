@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% from "_macros.html" import field %}
+{% block title %}Kích cỡ & Màu sắc - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('attributes') }}</div>
+  <div class="col-lg-9">
+    <h1 class="h4 mb-4">Quản lý Thuộc tính: Kích cỡ & Màu sắc</h1>
+
+    <div class="row g-4">
+      <!-- Cột kích cỡ (Size) -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-white fw-bold">Thêm Kích cỡ mới</div>
+          <div class="card-body">
+            <form method="post" action="{{ url_for('admin.size_create') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {{ field(size_form.name, placeholder="S, M, L, XL, XXL...") }}
+              {{ field(size_form.sort_order, placeholder="Thứ tự (ví dụ 1, 2, 3)") }}
+              <button type="submit" class="btn btn-sm btn-primary">Thêm kích cỡ</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white fw-bold">Danh sách kích cỡ</div>
+          <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+              <thead><tr><th>Kích cỡ</th><th>Thứ tự</th></tr></thead>
+              <tbody>
+                {% for s in sizes %}
+                <tr><td class="fw-bold">{{ s.name }}</td><td>{{ s.sort_order }}</td></tr>
+                {% else %}
+                <tr><td colspan="2" class="text-muted p-3 text-center">Chưa có kích cỡ nào.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cột màu sắc (Color) -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-white fw-bold">Thêm Màu sắc mới</div>
+          <div class="card-body">
+            <form method="post" action="{{ url_for('admin.color_create') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {{ field(color_form.name, placeholder="Đen, Trắng, Đỏ...") }}
+              {{ field(color_form.hex_code, placeholder="#000000, #FFFFFF...") }}
+              <button type="submit" class="btn btn-sm btn-primary">Thêm màu sắc</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white fw-bold">Danh sách màu sắc</div>
+          <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+              <thead><tr><th>Màu</th><th>Mã Hex</th><th>Hiển thị</th></tr></thead>
+              <tbody>
+                {% for c in colors %}
+                <tr>
+                  <td class="fw-bold">{{ c.name }}</td>
+                  <td><code>{{ c.hex_code }}</code></td>
+                  <td>
+                    <span class="d-inline-block border rounded-circle shadow-sm" style="width: 20px; height: 20px; background-color: {{ c.hex_code }};"></span>
+                  </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3" class="text-muted p-3 text-center">Chưa có màu sắc nào.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

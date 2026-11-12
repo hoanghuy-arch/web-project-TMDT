@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "admin/_nav.html" import admin_nav with context %}
+{% from "_macros.html" import field, select, checkbox %}
+{% block title %}Bảng Phí Vận chuyển - SportZone{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-3">{{ admin_nav('shipping_fees') }}</div>
+  <div class="col-lg-9">
+    <h1 class="h4 mb-4">Quản lý Bảng Phí Vận chuyển (FR-QT07)</h1>
+
+    <div class="row g-4">
+      <div class="col-md-5">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white fw-bold">Thêm / Cập nhật Quy tắc phí</div>
+          <div class="card-body">
+            <form method="post" action="{{ url_for('admin.shipping_fee_create') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {{ select(form.province_id) }}
+              {{ field(form.fee, placeholder="Ví dụ: 30000") }}
+              {{ field(form.free_threshold, placeholder="Ví dụ: 500000") }}
+              {{ checkbox(form.is_active) }}
+              <button type="submit" class="btn btn-sm btn-primary">Lưu quy tắc</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-7">
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white fw-bold">Bảng quy tắc hiện tại</div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr><th>Khu vực</th><th>Phí ship</th><th>Miễn phí từ</th><th>Trạng thái</th></tr>
+                </thead>
+                <tbody>
+                  {% for r in rules %}
+                  <tr>
+                    <td class="fw-bold">
+                      {% if r.province_id %}
+                        {{ r.province.name }}
+                      {% else %}
+                        <span class="badge text-bg-primary">Mức mặc định toàn quốc</span>
+                      {% endif %}
+                    </td>
+                    <td class="text-success fw-bold">{{ r.fee | vnd }}</td>
+                    <td>{{ (r.free_threshold | vnd) if r.free_threshold else '<span class="text-muted">Không áp dụng</span>' | safe }}</td>
+                    <td>
+                      <span class="badge text-bg-{{ 'success' if r.is_active else 'secondary' }}">
+                        {{ 'Áp dụng' if r.is_active else 'Tạm ngưng' }}
+                      </span>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr><td colspan="4" class="text-center text-muted p-4">Chưa có quy tắc nào. Hãy thêm mức mặc định toàn quốc trước.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

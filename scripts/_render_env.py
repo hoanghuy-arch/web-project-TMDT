@@ -38,6 +38,22 @@ RULES = {
                 "cart_clean": "/account/cart/clean", "checkout": "/account/checkout", "orders": "/account/orders",
                 "order_detail": "/account/orders/<order_code>", "order_cancel": "/account/orders/<order_code>/cancel",
                 "return_new": "/account/orders/<order_code>/return", "review_new": "/account/orders/<order_code>/review/<int:item_id>"},
+    "admin": {"dashboard": "/admin/", "reports": "/admin/reports", "categories": "/admin/categories",
+              "category_create": "/admin/categories/new", "category_edit": "/admin/categories/<int:cat_id>/edit",
+              "category_toggle": "/admin/categories/<int:cat_id>/toggle", "attributes": "/admin/attributes",
+              "size_create": "/admin/sizes/new", "color_create": "/admin/colors/new", "products": "/admin/products",
+              "product_create": "/admin/products/new", "product_detail": "/admin/products/<int:product_id>",
+              "product_edit": "/admin/products/<int:product_id>/edit", "product_toggle": "/admin/products/<int:product_id>/toggle",
+              "variant_create": "/admin/products/<int:product_id>/variants/new",
+              "image_create": "/admin/products/<int:product_id>/images/new",
+              "image_delete": "/admin/images/<int:image_id>/delete", "suppliers": "/admin/suppliers",
+              "supplier_create": "/admin/suppliers/new", "supplier_edit": "/admin/suppliers/<int:supplier_id>/edit",
+              "carriers": "/admin/carriers", "carrier_create": "/admin/carriers/new",
+              "promotions": "/admin/promotions", "promotion_create": "/admin/promotions/new",
+              "promotion_edit": "/admin/promotions/<int:promo_id>/edit", "shipping_fees": "/admin/shipping-fees",
+              "shipping_fee_create": "/admin/shipping-fees/new", "users": "/admin/users",
+              "user_create": "/admin/users/new", "user_edit": "/admin/users/<int:user_id>/edit",
+              "roles": "/admin/roles", "settings": "/admin/settings", "audit_logs": "/admin/audit-logs"},
 }
 
 

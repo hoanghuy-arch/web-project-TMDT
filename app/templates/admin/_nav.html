@@ -1,0 +1,64 @@
+{# Menu điều hướng khu vực Quản trị viên #}
+{% macro admin_nav(active) -%}
+<div class="list-group shadow-sm mb-3">
+  <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'dashboard' }}">
+    <i class="bi bi-speedometer2"></i> Tổng quan
+  </a>
+  {% if current_user.has_permission('report.view') %}
+  <a href="{{ url_for('admin.reports') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'reports' }}">
+    <i class="bi bi-bar-chart-line"></i> Báo cáo doanh thu
+  </a>
+  {% endif %}
+  {% if current_user.has_permission('catalog.manage') %}
+  <a href="{{ url_for('admin.categories') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'categories' }}">
+    <i class="bi bi-folder"></i> Danh mục
+  </a>
+  <a href="{{ url_for('admin.attributes') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'attributes' }}">
+    <i class="bi bi-tags"></i> Kích cỡ & Màu sắc
+  </a>
+  {% endif %}
+  {% if current_user.has_permission('product.manage') %}
+  <a href="{{ url_for('admin.products') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'products' }}">
+    <i class="bi bi-box-seam"></i> Sản phẩm & Biến thể
+  </a>
+  {% endif %}
+  {% if current_user.has_permission('supplier.manage') %}
+  <a href="{{ url_for('admin.suppliers') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'suppliers' }}">
+    <i class="bi bi-building"></i> Nhà cung cấp
+  </a>
+  {% endif %}
+  {% if current_user.has_permission('catalog.manage') %}
+  <a href="{{ url_for('admin.carriers') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'carriers' }}">
+    <i class="bi bi-truck"></i> Đơn vị vận chuyển
+  </a>
+  {% endif %}
+  {% if current_user.has_permission('promotion.manage') %}
+  <a href="{{ url_for('admin.promotions') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'promotions' }}">
+    <i class="bi bi-ticket-perforated"></i> Mã khuyến mãi
+  </a>
+  {% endif %}
+  {% if current_user.has_permission('shipping_fee.manage') %}
+  <a href="{{ url_for('admin.shipping_fees') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'shipping_fees' }}">
+    <i class="bi bi-geo-alt"></i> Phí vận chuyển
+  </a>
+  {% endif %}
+  {% if current_user.has_permission('user.manage') %}
+  <a href="{{ url_for('admin.users') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'users' }}">
+    <i class="bi bi-people"></i> Tài khoản người dùng
+  </a>
+  <a href="{{ url_for('admin.roles') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'roles' }}">
+    <i class="bi bi-shield-lock"></i> Phân quyền vai trò
+  </a>
+  {% endif %}
+  {% if current_user.has_permission('setting.manage') %}
+  <a href="{{ url_for('admin.settings') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'settings' }}">
+    <i class="bi bi-sliders"></i> Tham số hệ thống
+  </a>
+  {% endif %}
+  {% if current_user.has_permission('audit.view') %}
+  <a href="{{ url_for('admin.audit_logs') }}" class="list-group-item list-group-item-action {{ 'active' if active == 'audit_logs' }}">
+    <i class="bi bi-journal-text"></i> Nhật ký hoạt động
+  </a>
+  {% endif %}
+</div>
+{%- endmacro %}
