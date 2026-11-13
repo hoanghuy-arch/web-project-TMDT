@@ -1,33 +1,170 @@
-:root {
-  --sz-primary: #ff5722;
-  --sz-primary-dark: #e64a19;
-  --sz-dark: #14181f;
-}
-.sz-navbar { background: var(--sz-dark); }
-.sz-navbar .navbar-brand i { color: var(--sz-primary); }
-.sz-footer { background: var(--sz-dark); color: #aab2bd; }
-.sz-hero { background: linear-gradient(135deg, var(--sz-dark), #2b3544 60%, var(--sz-primary-dark)); }
-.text-sz { color: var(--sz-primary); }
-.btn-sz { background: var(--sz-primary); border-color: var(--sz-primary); color: #fff; }
-.btn-sz:hover, .btn-sz:focus { background: var(--sz-primary-dark); border-color: var(--sz-primary-dark); color: #fff; }
-.btn-outline-sz { border-color: var(--sz-primary); color: var(--sz-primary); }
-.btn-outline-sz:hover { background: var(--sz-primary); color: #fff; }
+/* ============================================================
+   SportZone — Style sheet
+   Phong cách: thể thao tối giản, nền trắng, tương phản cao
+   ============================================================ */
 
-/* ---------- cửa hàng ---------- */
-.sz-card { transition: transform .15s ease, box-shadow .15s ease; }
-.sz-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important; }
-.sz-card-img { aspect-ratio: 1 / 1; overflow: hidden; background: #f1f3f5; }
+/* ---------- Google Fonts ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ---------- Biến màu sắc ---------- */
+:root {
+  --sz-primary:      #001e62;   /* xanh navy đậm — màu chủ đạo duy nhất */
+  --sz-primary-dark: #001040;   /* navy đậm hơn khi hover */
+  --sz-dark:         #001e62;   /* navbar / footer */
+  --sz-accent:       #e63946;   /* nhấn SALE / khuyến mãi */
+  --sz-bg:           #ffffff;   /* nền trang chính */
+  --sz-topbar-bg:    #e8ecf7;   /* nền thanh thông báo trên cùng */
+  --sz-card-img-bg:  #f7f7f7;   /* nền khung ảnh sản phẩm */
+  --sz-border:       #e5e7eb;   /* viền đường kẻ mảnh */
+  --sz-muted:        #6b7280;   /* chữ phụ / mô tả mờ */
+}
+
+/* ---------- Typography ---------- */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--sz-bg);
+  color: #0d1b3e;
+}
+
+/* ---------- Navbar ---------- */
+.sz-navbar { background: var(--sz-dark); }
+.sz-navbar .navbar-brand i { color: #ffffff; }
+
+/* Ô tìm kiếm trên header */
+.sz-navbar .form-control {
+  border-radius: 999px;
+  border: none;
+  font-size: .875rem;
+}
+.sz-navbar .btn-sz { border-radius: 999px; }
+
+/* ---------- Footer ---------- */
+.sz-footer { background: var(--sz-dark); color: #a0aec0; }
+
+/* ---------- Hero banner ---------- */
+.sz-hero {
+  background: linear-gradient(135deg, var(--sz-primary) 0%, #002f8f 60%, #0a1f6b 100%);
+}
+
+/* ---------- Màu chủ đề ---------- */
+.text-sz { color: var(--sz-primary); }
+
+/* ---------- Nút chính ---------- */
+.btn-sz {
+  background: var(--sz-primary);
+  border-color: var(--sz-primary);
+  color: #ffffff;
+  border-radius: 4px;
+  font-weight: 500;
+  box-shadow: none;
+}
+.btn-sz:hover, .btn-sz:focus {
+  background: var(--sz-primary-dark);
+  border-color: var(--sz-primary-dark);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+/* ---------- Nút outline ---------- */
+.btn-outline-sz {
+  border-color: var(--sz-primary);
+  color: var(--sz-primary);
+  border-radius: 4px;
+  font-weight: 500;
+}
+.btn-outline-sz:hover {
+  background: var(--sz-primary);
+  color: #ffffff;
+}
+
+/* ---------- Màu nhấn SALE / khuyến mãi ---------- */
+.sz-sale, .badge-sale, .text-sale { color: var(--sz-accent); }
+.bg-sale { background: var(--sz-accent); color: #fff; }
+
+/* ---------- Thẻ sản phẩm (product card) ---------- */
+.sz-card {
+  border: 1px solid var(--sz-border) !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.sz-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--sz-primary) !important;
+  box-shadow: none !important;
+}
+
+/* Khung ảnh sản phẩm */
+.sz-card-img {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--sz-card-img-bg);
+  border-radius: 0;
+}
 .sz-card-img img { width: 100%; height: 100%; object-fit: cover; }
-.sz-dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,.25); }
-.sz-benefit { background: #fff4ef; }
-.sz-cat { background: #f8f9fa; border: 1px solid #e9ecef; transition: border-color .15s ease; }
+
+/* ---------- Dot màu sắc ---------- */
+.sz-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,.18);
+}
+
+/* ---------- Khung lợi ích (benefits bar) ---------- */
+.sz-benefit { background: var(--sz-topbar-bg); }
+
+/* ---------- Danh mục ---------- */
+.sz-cat {
+  background: #f8f9fa;
+  border: 1px solid var(--sz-border);
+  border-radius: 4px;
+  transition: border-color .15s ease;
+}
 .sz-cat:hover { border-color: var(--sz-primary); }
-.sz-gallery-main { aspect-ratio: 1 / 1; background: #f1f3f5; }
+
+/* ---------- Gallery trang chi tiết sản phẩm ---------- */
+.sz-gallery-main {
+  aspect-ratio: 1 / 1;
+  background: var(--sz-card-img-bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
 .sz-gallery-main img { height: 100%; object-fit: cover; }
-.sz-thumb { width: 72px; height: 72px; }
+
+.sz-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--sz-border);
+}
 .sz-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.sz-stars { color: #ffb400; white-space: nowrap; }
-.sz-size-btn { min-width: 3rem; }
+
+/* ---------- Sao đánh giá ---------- */
+.sz-stars { color: #f5a623; white-space: nowrap; }
+
+/* ---------- Nút chọn kích cỡ ---------- */
+.sz-size-btn { min-width: 3rem; border-radius: 4px; }
+
+/* ---------- Biến thể không có hàng ---------- */
 .sz-unavailable { opacity: .4; text-decoration: line-through; pointer-events: none; }
-.btn-check:checked + .btn-outline-secondary { background: var(--sz-dark); border-color: var(--sz-dark); color: #fff; }
+
+/* ---------- Radio button size/màu (Bootstrap override) ---------- */
+.btn-check:checked + .btn-outline-secondary {
+  background: var(--sz-dark);
+  border-color: var(--sz-dark);
+  color: #fff;
+}
 .sz-filter .btn-check:checked + .btn-outline-secondary .sz-dot { border-color: #fff; }
+
+/* ---------- Override Bootstrap: loại bỏ shadow và bo góc lớn ---------- */
+.card        { box-shadow: none !important; border: 1px solid var(--sz-border); border-radius: 4px; }
+.shadow-sm   { box-shadow: none !important; }
+.shadow      { box-shadow: none !important; }
+.rounded-3   { border-radius: 4px !important; }
+.rounded-4   { border-radius: 4px !important; }
+
+/* ---------- Chữ phụ / mô tả ---------- */
+.text-muted { color: var(--sz-muted) !important; }
