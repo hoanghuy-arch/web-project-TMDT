@@ -17,6 +17,7 @@ def create_app(config_name=None):
     _register_error_handlers(app)
     _register_hooks(app)
     register_filters(app)
+    _init_scheduler(app)
 
     @app.route("/health")
     def health():
@@ -85,3 +86,9 @@ def _register_hooks(app):
         resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
         resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         return resp
+
+
+def _init_scheduler(app):
+    """Khởi động các tác vụ nền (FR-HT01). Bỏ qua khi TESTING."""
+    from app.tasks.scheduler import init_scheduler
+    init_scheduler(app)

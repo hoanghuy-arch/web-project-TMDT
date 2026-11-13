@@ -1,0 +1,18 @@
+Xin chào {{ full_name }},
+
+Đơn hàng {{ order.order_code }} của bạn đã được cập nhật trạng thái.
+
+Trạng thái mới: {{ new_status_label }}
+
+{% if reason %}Ghi chú: {{ reason }}
+{% endif %}
+{% if order.status == 'SHIPPING' %}Đơn hàng của bạn đang được giao. Vui lòng chú ý điện thoại để nhận hàng.
+{% elif order.status == 'COMPLETED' %}Đơn hàng đã được giao thành công. Cảm ơn bạn đã mua sắm tại SportZone!
+{% elif order.status == 'CANCELLED' %}Đơn hàng đã bị hủy. Nếu bạn đã thanh toán, chúng tôi sẽ liên hệ để hoàn tiền.
+{% elif order.status == 'RETURNING' %}Yêu cầu đổi trả của bạn đã được chấp nhận. Vui lòng gửi hàng về địa chỉ của chúng tôi.
+{% elif order.status == 'RETURNED' %}Yêu cầu đổi trả đã hoàn tất.
+{% endif %}
+Bạn có thể xem chi tiết đơn hàng tại: {{ order_url }}
+
+Trân trọng,
+SportZone

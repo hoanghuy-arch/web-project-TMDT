@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<body style="font-family: Arial, Helvetica, sans-serif; color: #222; line-height: 1.6; margin: 0; padding: 0;">
+  <div style="max-width: 560px; margin: 0 auto; padding: 24px;">
+    <h2 style="color: #ff5722; margin-top: 0;">SportZone</h2>
+    <p>Xin chào <strong>{{ full_name }}</strong>,</p>
+    <p>Đơn hàng <strong>{{ order.order_code }}</strong> của bạn đã được cập nhật trạng thái.</p>
+
+    <div style="background: #f9f9f9; border-left: 4px solid #ff5722; padding: 14px 18px; margin: 18px 0; border-radius: 2px;">
+      <p style="margin: 0; font-size: 15px;">
+        Trạng thái mới:
+        <strong style="color: #ff5722;">{{ new_status_label }}</strong>
+      </p>
+      {% if reason %}
+      <p style="margin: 8px 0 0; color: #555; font-size: 13px;">Ghi chú: {{ reason }}</p>
+      {% endif %}
+    </div>
+
+    {% if order.status == 'SHIPPING' %}
+    <p>📦 Đơn hàng đang trên đường giao đến bạn. Vui lòng chú ý điện thoại để nhận hàng.</p>
+    {% elif order.status == 'COMPLETED' %}
+    <p>✅ Đơn hàng đã được giao thành công. Cảm ơn bạn đã mua sắm tại SportZone!</p>
+    {% elif order.status == 'CANCELLED' %}
+    <p>❌ Đơn hàng đã bị hủy. Nếu bạn đã thanh toán, chúng tôi sẽ liên hệ để hoàn tiền trong thời gian sớm nhất.</p>
+    {% elif order.status == 'RETURNING' %}
+    <p>🔄 Yêu cầu đổi trả của bạn đã được chấp nhận. Vui lòng gửi hàng về địa chỉ của chúng tôi.</p>
+    {% elif order.status == 'RETURNED' %}
+    <p>✅ Yêu cầu đổi trả đã hoàn tất. Cảm ơn bạn đã kiên nhẫn chờ đợi.</p>
+    {% endif %}
+
+    <p>
+      <a href="{{ order_url }}"
+         style="display: inline-block; background: #ff5722; color: #fff; text-decoration: none;
+                padding: 10px 22px; border-radius: 4px; font-size: 14px;">
+        Xem chi tiết đơn hàng
+      </a>
+    </p>
+
+    <p style="font-size: 13px; color: #888; margin-top: 24px;">
+      Email này được gửi tự động bởi hệ thống SportZone. Vui lòng không trả lời email này.
+    </p>
+  </div>
+</body>
+</html>

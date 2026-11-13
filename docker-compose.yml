@@ -1,0 +1,90 @@
+version: "3.9"
+
+# ============================================================
+#  SportZone — Docker Compose (dev/demo)
+#  Dịch vụ: MySQL 8 → Flask/Gunicorn → Nginx (reverse proxy)
+#
+#  Khởi động:   docker compose up --build
+#  Seed data:   tự động chạy khi app khởi động (seed_dev.py)
+#  Stop:        docker compose down
+#  Xóa dữ liệu: docker compose down -v
+# ============================================================
+
+services:
+
+  # ---- MySQL 8 ------------------------------------------------
+  db:
+    image: mysql:8.0
+    container_name: sportzone-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: sportzone
+      MYSQL_USER: sportzone
+      MYSQL_PASSWORD: sportzone123
+    ports:
+      - "3306:3306"           # tiện kết nối bằng GUI client khi dev
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=caching_sha2_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "sportzone", "-psportzone123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ---- Flask/Gunicorn -----------------------------------------
+  app:
+    build: .
+    container_name: sportzone-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FLASK_APP: wsgi.py
+      FLASK_ENV: production
+      SECRET_KEY: "THAY-BANG-CHUOI-BÍ-MẬT-NGẪU-NHIÊN-DÀI-TRONG-PRODUCTION"
+      DATABASE_URL: "mysql+pymysql://sportzone:sportzone123@db:3306/sportzone?charset=utf8mb4"
+      PAYMENT_MOCK_ENABLED: "true"       # demo/sandbox; đặt false và điền VNPay thật để production
+      PAYMENT_SANDBOX_MODE: "true"
+      RATELIMIT_STORAGE_URI: "memory://" # đổi sang redis:// khi scale nhiều container
+      MAIL_SUPPRESS_SEND: "true"         # chưa cấu hình SMTP: ghi log thay vì gửi thật
+      # Bỏ comment và điền giá trị thật khi muốn gửi email thật:
+      # MAIL_SERVER: smtp.gmail.com
+      # MAIL_PORT: 587
+      # MAIL_USE_TLS: "true"
+      # MAIL_USERNAME: your@gmail.com
+      # MAIL_PASSWORD: app-password
+    expose:
+      - "8000"
+    volumes:
+      - app_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # ---- Nginx (reverse proxy + static files) -------------------
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: sportzone-nginx
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./app/static:/srv/static:ro   # nginx phục vụ static trực tiếp
+
+volumes:
+  mysql_data:
+  app_logs:

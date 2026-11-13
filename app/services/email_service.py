@@ -49,3 +49,35 @@ def send_order_confirmation_email(order):
         text_body=render_template("emails/order_confirmation.txt", **ctx),
         html_body=render_template("emails/order_confirmation.html", **ctx),
     )
+
+
+def send_order_status_changed_email(order, new_status_label, reason=None):
+    """Email thông báo thay đổi trạng thái đơn hàng (FR-HT02).
+
+    Gửi cho khách khi nhân viên/hệ thống cập nhật trạng thái.
+    Chỉ gửi cho các trạng thái đáng thông báo; bỏ qua PENDING_PAYMENT và PENDING_CONFIRM
+    vì khách đã nhận email xác nhận riêng khi đặt hàng.
+    """
+    from flask import url_for
+    account = order.account
+    # Tránh spam cho trạng thái nội bộ
+    _SKIP_NOTIFY = {"PENDING_PAYMENT", "PENDING_CONFIRM", "CONFIRMED", "PACKING"}
+    if order.status in _SKIP_NOTIFY:
+        return
+    try:
+        order_url = url_for("account.order_detail", order_code=order.order_code, _external=True)
+    except Exception:
+        order_url = ""
+    ctx = dict(
+        full_name=account.full_name,
+        order=order,
+        new_status_label=new_status_label,
+        reason=reason,
+        order_url=order_url,
+    )
+    send_email(
+        to=account.email,
+        subject=f"SportZone - Đơn hàng {order.order_code}: {new_status_label}",
+        text_body=render_template("emails/order_status_changed.txt", **ctx),
+        html_body=render_template("emails/order_status_changed.html", **ctx),
+    )

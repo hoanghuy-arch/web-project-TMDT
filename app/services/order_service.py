@@ -290,3 +290,20 @@ def status_counts(account):
     rows = db.session.execute(select(SalesOrder.status, func.count(SalesOrder.id))
                               .where(SalesOrder.account_id == account.id).group_by(SalesOrder.status)).all()
     return {status: n for status, n in rows}
+
+
+# ================================================================== thông báo thay đổi trạng thái (FR-HT02 mở rộng)
+def notify_order_status_changed(order, reason=None):
+    """Gửi email thông báo trạng thái mới cho khách hàng (FR-HT02).
+
+    Gọi SAU KHI commit() để tránh gửi email rồi rollback.
+    Lỗi email không được raise lên caller.
+    """
+    try:
+        from app.constants import OrderStatus
+        from app.services.email_service import send_order_status_changed_email
+        label = OrderStatus.LABELS.get(order.status, order.status)
+        send_order_status_changed_email(order, new_status_label=label, reason=reason)
+    except Exception:
+        current_app.logger.exception(
+            "Gửi email thay đổi trạng thái đơn %s thất bại", order.order_code)
