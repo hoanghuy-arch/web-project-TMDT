@@ -5,7 +5,7 @@ import re
 import unicodedata
 
 from flask import current_app
-from sqlalchemy import desc, func, or_, select
+from sqlalchemy import case, desc, func, or_, select
 from sqlalchemy.orm import selectinload
 from werkzeug.security import generate_password_hash
 
@@ -460,7 +460,10 @@ def save_promotion(code, discount_type, discount_value, min_order_value, max_dis
 def get_shipping_rules():
     return db.session.scalars(
         select(ShippingFeeRule).options(selectinload(ShippingFeeRule.province))
-        .order_by(ShippingFeeRule.province_id.nulls_first())
+        .order_by(
+            case((ShippingFeeRule.province_id.is_(None), 0), else_=1),
+            ShippingFeeRule.province_id.asc(),
+        )
     ).all()
 
 

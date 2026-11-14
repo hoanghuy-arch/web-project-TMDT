@@ -39,7 +39,7 @@
                   <tr>
                     <td class="fw-bold">
                       {% if r.province_id %}
-                        {{ r.province.name }}
+                        {{ r.province.name if r.province else ('Tỉnh/TP #' ~ r.province_id) }}
                       {% else %}
                         <span class="badge text-bg-primary">Mức mặc định toàn quốc</span>
                       {% endif %}
