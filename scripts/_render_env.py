@@ -51,7 +51,7 @@ RULES = {
               "carriers": "/admin/carriers", "carrier_create": "/admin/carriers/new",
               "promotions": "/admin/promotions", "promotion_create": "/admin/promotions/new",
               "promotion_edit": "/admin/promotions/<int:promo_id>/edit", "shipping_fees": "/admin/shipping-fees",
-              "shipping_fee_create": "/admin/shipping-fees/new", "users": "/admin/users",
+              "shipping_fee_create": "/admin/shipping-fees/new", "shipping_fee_delete": "/admin/shipping-fees/<int:rule_id>/delete", "users": "/admin/users",
               "user_create": "/admin/users/new", "user_edit": "/admin/users/<int:user_id>/edit",
               "roles": "/admin/roles", "settings": "/admin/settings", "audit_logs": "/admin/audit-logs"},
 }

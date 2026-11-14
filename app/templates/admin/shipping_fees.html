@@ -6,7 +6,7 @@
 <div class="row g-4">
   <div class="col-lg-3">{{ admin_nav('shipping_fees') }}</div>
   <div class="col-lg-9">
-    <h1 class="h4 mb-4">Quản lý Bảng Phí Vận chuyển (FR-QT07)</h1>
+    <h1 class="h4 mb-4">Quản lý Bảng Phí Vận chuyển </h1>
 
     <div class="row g-4">
       <div class="col-md-5">
@@ -32,7 +32,7 @@
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
-                  <tr><th>Khu vực</th><th>Phí ship</th><th>Miễn phí từ</th><th>Trạng thái</th></tr>
+                  <tr><th>Khu vực</th><th>Phí ship</th><th>Miễn phí từ</th><th>Trạng thái</th><th class="text-end pe-3">Thao tác</th></tr>
                 </thead>
                 <tbody>
                   {% for r in rules %}
@@ -51,9 +51,19 @@
                         {{ 'Áp dụng' if r.is_active else 'Tạm ngưng' }}
                       </span>
                     </td>
+                    <td class="text-end pe-3">
+                      <form method="post" action="{{ url_for('admin.shipping_fee_delete', rule_id=r.id) }}"
+                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa quy tắc phí vận chuyển này?');"
+                            class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Xóa quy tắc">
+                          <i class="bi bi-trash"></i> Xóa
+                        </button>
+                      </form>
+                    </td>
                   </tr>
                   {% else %}
-                  <tr><td colspan="4" class="text-center text-muted p-4">Chưa có quy tắc nào. Hãy thêm mức mặc định toàn quốc trước.</td></tr>
+                  <tr><td colspan="5" class="text-center text-muted p-4">Chưa có quy tắc nào. Hãy thêm mức mặc định toàn quốc trước.</td></tr>
                   {% endfor %}
                 </tbody>
               </table>

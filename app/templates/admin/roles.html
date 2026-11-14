@@ -33,7 +33,7 @@
   <div class="col-lg-9">
 
     <h1 class="h4 mb-1">Phân quyền Vai trò Nhân viên</h1>
-    <p class="text-muted small mb-4">Chọn các quyền nghiệp vụ bên dưới để giao cho vai trò <strong>Nhân viên (STAFF)</strong>. Quản trị viên luôn có toàn bộ quyền hệ thống.</p>
+    <p class="text-muted small mb-4">Chọn các quyền nghiệp vụ bên dưới để giao cho vai trò <strong>Nhân viên (STAFF)</strong></p>
 
     {# Chỉ render card STAFF #}
     {% for r in roles %}{% if r.name == 'STAFF' %}
@@ -81,10 +81,9 @@
                        type="checkbox" name="permissions" value="{{ p.code }}"
                        {{ 'checked' if p.code in current_codes }}>
                 <div>
-                  <div class="fw-bold" style="font-size:13px; color: var(--sz-primary);">
+                  <div class="fw-bold" style="font-size:14px; color: var(--sz-primary);">
                     {{ perm_labels.get(p.code, p.code) }}
                   </div>
-                  <code class="small text-muted">{{ p.code }}</code>
                 </div>
               </label>
             </div>
@@ -98,8 +97,7 @@
       <div class="alert alert-light border mb-4" style="border-color: var(--sz-border) !important; border-radius: 4px;">
         <i class="bi bi-shield-lock text-muted me-1"></i>
         <span class="small text-muted">
-          Các quyền hệ thống (Quản lý tài khoản, Phân quyền, Báo cáo, Cấu hình, Nhật ký...) 
-          chỉ dành cho <strong>Quản trị viên (ADMIN)</strong> và không thể giao cho Nhân viên.
+          Quản trị viên luôn có toàn bộ quyền hệ thống.
         </span>
       </div>
 

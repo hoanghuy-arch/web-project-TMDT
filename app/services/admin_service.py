@@ -481,15 +481,34 @@ def save_shipping_rule(province_id, fee, free_threshold=None, is_active=True, ru
         r.is_active = is_active
         action = "shipping_rule.update"
     else:
-        r = ShippingFeeRule(province_id=prov_id, fee=fee, free_threshold=free_threshold, is_active=is_active)
-        db.session.add(r)
-        db.session.flush()
-        action = "shipping_rule.create"
+        existing = db.session.scalar(select(ShippingFeeRule).where(ShippingFeeRule.province_id == prov_id))
+        if existing:
+            existing.fee = fee
+            existing.free_threshold = free_threshold
+            existing.is_active = is_active
+            r = existing
+            action = "shipping_rule.update"
+        else:
+            r = ShippingFeeRule(province_id=prov_id, fee=fee, free_threshold=free_threshold, is_active=is_active)
+            db.session.add(r)
+            db.session.flush()
+            action = "shipping_rule.create"
 
     audit_service.record(action, "shipping_fee_rule", r.id, None,
                          {"province_id": prov_id, "fee": str(fee)}, actor)
     db.session.commit()
     return r
+
+
+def delete_shipping_rule(rule_id, actor=None):
+    r = db.session.get(ShippingFeeRule, rule_id)
+    if not r:
+        return False
+    audit_service.record("shipping_rule.delete", "shipping_fee_rule", r.id,
+                         {"province_id": r.province_id, "fee": str(r.fee)}, None, actor)
+    db.session.delete(r)
+    db.session.commit()
+    return True
 
 
 # ------------------------------------------------------------------ 7. Quản lý Người dùng & Phân quyền (FR-QT03)
