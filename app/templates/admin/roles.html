@@ -2,51 +2,151 @@
 {% from "admin/_nav.html" import admin_nav with context %}
 {% block title %}Phân quyền Vai trò - SportZone{% endblock %}
 {% block content %}
+
+{# Nhóm quyền cốt lõi của Nhân viên — không hiển thị quyền hệ thống của Admin #}
+{% set STAFF_GROUPS = [
+  {
+    'label':  'Đơn hàng & Giao vận',
+    'icon':   'bi-receipt-cutoff',
+    'color':  'primary',
+    'desc':   'Quyền xem, xử lý và theo dõi trạng thái giao vận đơn hàng.',
+    'codes':  ['order.view', 'order.process', 'shipment.update']
+  },
+  {
+    'label':  'Xử lý Đổi trả',
+    'icon':   'bi-arrow-repeat',
+    'color':  'warning',
+    'desc':   'Quyền duyệt hoặc từ chối yêu cầu đổi trả từ khách hàng.',
+    'codes':  ['return.handle']
+  },
+  {
+    'label':  'Quản lý Kho hàng',
+    'icon':   'bi-boxes',
+    'color':  'success',
+    'desc':   'Quyền tra cứu tồn kho, lập phiếu nhập/xuất và điều chỉnh số lượng.',
+    'codes':  ['stock.view', 'stock.receipt', 'stock.issue', 'stock.adjust']
+  }
+] %}
+
 <div class="row g-4">
   <div class="col-lg-3">{{ admin_nav('roles') }}</div>
   <div class="col-lg-9">
-    <h1 class="h4 mb-4">Phân quyền Vai trò (RBAC)</h1>
 
-    <div class="alert alert-info">
-      <i class="bi bi-info-circle"></i> <strong>Lưu ý:</strong> Vai trò <strong>Quản trị viên (ADMIN)</strong> luôn có toàn bộ quyền hệ thống; vai trò <strong>Khách hàng (CUSTOMER)</strong> không được gán quyền nhân viên. Bạn có thể tùy biến quyền hạn cho vai trò <strong>Nhân viên (STAFF)</strong> bên dưới.
+    <h1 class="h4 mb-1">Phân quyền Vai trò Nhân viên</h1>
+    <p class="text-muted small mb-4">Chọn các quyền nghiệp vụ bên dưới để giao cho vai trò <strong>Nhân viên (STAFF)</strong>. Quản trị viên luôn có toàn bộ quyền hệ thống.</p>
+
+    {# Chỉ render card STAFF #}
+    {% for r in roles %}{% if r.name == 'STAFF' %}
+    {% set current_codes = r.permissions | map(attribute='code') | list %}
+
+    {# Thống kê nhanh #}
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <span class="badge text-bg-info fs-6 px-3 py-2">
+        <i class="bi bi-person-badge"></i> NHÂN VIÊN (STAFF)
+      </span>
+      <span class="text-muted small">{{ r.accounts | length }} tài khoản đang giữ vai trò này</span>
+      <span class="text-muted small ms-auto">
+        Đang được cấp: <strong>{{ current_codes | length }}</strong> / 8 quyền
+      </span>
     </div>
 
-    {% for r in roles %}
-    {% if r.name == 'STAFF' %}
-    <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
-        <span>Bảng phân quyền cho vai trò: <span class="badge text-bg-info">NHÂN VIÊN (STAFF)</span></span>
-        <span class="small text-muted">{{ r.accounts | length }} tài khoản đang giữ vai trò này</span>
-      </div>
-      <div class="card-body">
-        <form method="post">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <input type="hidden" name="role_id" value="{{ r.id }}">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="role_id" value="{{ r.id }}">
 
-          {% set current_codes = r.permissions | map(attribute='code') | list %}
-          <div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
-            {% for p in permissions %}
+      {# 3 nhóm quyền cốt lõi #}
+      {% for group in STAFF_GROUPS %}
+      {% set grp_idx = loop.index %}
+      <div class="card mb-3" style="border: 1px solid var(--sz-border); border-radius: 4px;">
+        <div class="card-header bg-white d-flex align-items-center gap-2 py-3">
+          <i class="bi {{ group.icon }} text-{{ group.color }} fs-5"></i>
+          <div>
+            <div class="fw-bold" style="color: var(--sz-primary);">{{ group.label }}</div>
+            <div class="small text-muted">{{ group.desc }}</div>
+          </div>
+          {# Nút chọn/bỏ tất cả trong nhóm #}
+          <button type="button" class="btn btn-sm btn-outline-secondary ms-auto sz-toggle-group"
+                  data-group="{{ grp_idx }}">
+            Chọn tất cả nhóm này
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row row-cols-1 row-cols-md-2 g-2">
+            {% for p in permissions if p.code in group.codes %}
             <div class="col">
-              <div class="form-check p-2 rounded border bg-light">
-                <input class="form-check-input ms-0 me-2" type="checkbox" name="permissions" value="{{ p.code }}" id="perm_{{ p.id }}" {{ 'checked' if p.code in current_codes }}>
-                <label class="form-check-label" for="perm_{{ p.id }}">
-                  <div class="fw-bold">{{ perm_labels.get(p.code, p.code) }}</div>
+              <label class="d-flex align-items-start gap-2 p-3 rounded border w-100 sz-perm-label
+                            {{ 'sz-perm-checked' if p.code in current_codes }}"
+                     style="cursor: pointer; border-radius: 4px !important; transition: background .15s;">
+                <input class="form-check-input flex-shrink-0 mt-1 sz-perm-{{ grp_idx }}"
+                       type="checkbox" name="permissions" value="{{ p.code }}"
+                       {{ 'checked' if p.code in current_codes }}>
+                <div>
+                  <div class="fw-bold" style="font-size:13px; color: var(--sz-primary);">
+                    {{ perm_labels.get(p.code, p.code) }}
+                  </div>
                   <code class="small text-muted">{{ p.code }}</code>
-                </label>
-              </div>
+                </div>
+              </label>
             </div>
             {% endfor %}
           </div>
-
-          <div class="text-end">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-shield-check"></i> Lưu phân quyền cho Nhân viên</button>
-          </div>
-        </form>
+        </div>
       </div>
-    </div>
-    {% endif %}
-    {% endfor %}
+      {% endfor %}
+
+      {# Lưu ý về quyền hệ thống #}
+      <div class="alert alert-light border mb-4" style="border-color: var(--sz-border) !important; border-radius: 4px;">
+        <i class="bi bi-shield-lock text-muted me-1"></i>
+        <span class="small text-muted">
+          Các quyền hệ thống (Quản lý tài khoản, Phân quyền, Báo cáo, Cấu hình, Nhật ký...) 
+          chỉ dành cho <strong>Quản trị viên (ADMIN)</strong> và không thể giao cho Nhân viên.
+        </span>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-outline-secondary" id="btnSelectAll">
+          <i class="bi bi-check2-all"></i> Chọn tất cả
+        </button>
+        <button type="button" class="btn btn-outline-danger" id="btnClearAll">
+          <i class="bi bi-x-lg"></i> Bỏ tất cả
+        </button>
+        <button type="submit" class="btn btn-sz">
+          <i class="bi bi-shield-check"></i> Lưu phân quyền
+        </button>
+      </div>
+    </form>
+
+    {% endif %}{% endfor %}
 
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  .sz-perm-label:hover { background: #f0f4ff; }
+  .sz-perm-label:has(input:checked) { background: #eef2ff; border-color: var(--sz-primary) !important; }
+</style>
+<script>
+(function () {
+  /* Nút Chọn tất cả / Bỏ tất cả toàn trang */
+  document.getElementById('btnSelectAll').addEventListener('click', function () {
+    document.querySelectorAll('input[name="permissions"]').forEach(function (cb) { cb.checked = true; });
+  });
+  document.getElementById('btnClearAll').addEventListener('click', function () {
+    document.querySelectorAll('input[name="permissions"]').forEach(function (cb) { cb.checked = false; });
+  });
+
+  /* Nút Chọn tất cả theo từng nhóm */
+  document.querySelectorAll('.sz-toggle-group').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var group = btn.dataset.group;
+      var cbs = document.querySelectorAll('.sz-perm-' + group);
+      var allChecked = Array.from(cbs).every(function (cb) { return cb.checked; });
+      cbs.forEach(function (cb) { cb.checked = !allChecked; });
+      btn.textContent = allChecked ? 'Chọn tất cả nhóm này' : 'Bỏ tất cả nhóm này';
+    });
+  });
+})();
+</script>
 {% endblock %}
