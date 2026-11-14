@@ -47,7 +47,7 @@ services:
         condition: service_healthy
     environment:
       FLASK_APP: wsgi.py
-      FLASK_ENV: production
+      FLASK_ENV: development   # đổi thành production khi deploy thật
       SECRET_KEY: "THAY-BANG-CHUOI-BÍ-MẬT-NGẪU-NHIÊN-DÀI-TRONG-PRODUCTION"
       DATABASE_URL: "mysql+pymysql://sportzone:sportzone123@db:3306/sportzone?charset=utf8mb4"
       PAYMENT_MOCK_ENABLED: "true"       # demo/sandbox; đặt false và điền VNPay thật để production
@@ -64,6 +64,7 @@ services:
       - "8000"
     volumes:
       - app_logs:/app/logs
+      - .:/app                 # ← mount toàn bộ code vào container (hot-reload khi sửa template/CSS/Python)
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
