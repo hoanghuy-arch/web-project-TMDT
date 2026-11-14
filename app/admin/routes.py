@@ -447,6 +447,16 @@ def shipping_fee_create():
     return redirect(url_for("admin.shipping_fees"))
 
 
+@bp.route("/shipping-fees/<int:rule_id>/delete", methods=["POST"])
+@permission_required(Perm.SHIPPING_FEE_MANAGE)
+def shipping_fee_delete(rule_id):
+    if admin_service.delete_shipping_rule(rule_id, actor=current_user):
+        flash("Đã xóa quy tắc phí vận chuyển thành công.", "success")
+    else:
+        flash("Không tìm thấy quy tắc phí cần xóa.", "danger")
+    return redirect(url_for("admin.shipping_fees"))
+
+
 # ------------------------------------------------------------------ 7. Người dùng & Phân quyền (FR-QT03)
 @bp.route("/users")
 @permission_required(Perm.USER_MANAGE)
