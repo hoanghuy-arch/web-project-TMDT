@@ -139,8 +139,8 @@ SportZone xây dựng kiến trúc cổng thanh toán đa chế độ (*Multi-mo
 
 ---
 
-### Kịch bản 1: Báo cáo đồ án / Đánh giá học thuật (Mặc định)
-*Phù hợp nhất khi chấm đồ án, chạy demo nội bộ không phụ thuộc mạng ngoài.*
+### Chế độ 1: Báo cáo đồ án / Đánh giá học thuật (Mặc định)
+*Phù hợp nhất khi chấm đồ án, chạy demo nội bộ độc lập không phụ thuộc đường truyền hay đăng ký dịch vụ bên thứ ba.*
 
 1. Trong file `.env`, giữ nguyên:
    ```ini
@@ -149,37 +149,14 @@ SportZone xây dựng kiến trúc cổng thanh toán đa chế độ (*Multi-mo
 2. **Trải nghiệm demo:**
    - Sau khi bấm Đặt hàng, khách hàng được chuyển đến **Cổng thanh toán mô phỏng** (`/payment/mock/pay`).
    - Cung cấp sẵn 4 nút bấm kiểm thử nghiệp vụ:
-     1. **Thanh toán thành công**: Tạo chữ ký hợp lệ, cập nhật trạng thái đơn sang `PAID`, kích hoạt trừ tồn kho và ghi log giao dịch.
+     1. **Thanh toán thành công**: Tạo chữ ký số hợp lệ, cập nhật trạng thái đơn sang `PAID`, kích hoạt trừ tồn kho và ghi log giao dịch.
      2. **Thất bại (Số dư không đủ)**: Mô phỏng mã lỗi thẻ ngân hàng, cập nhật trạng thái `FAILED`.
      3. **Khách hàng hủy bỏ**: Mô phỏng thao tác hủy giao dịch, đơn hàng tự hoàn tiền/hủy an toàn.
      4. **Kiểm tra an ninh (Phát hiện can thiệp số tiền)**: Giả lập hacker sửa đổi số tiền trên URL, hệ thống bắt lỗi sai mã xác thực SHA-512 và từ chối xử lý.
 
 ---
 
-### Kịch bản 2: Kết nối trực tiếp Cổng VNPay Sandbox
-*Phù hợp khi muốn demo thao tác thực tế với cổng thanh toán VNPay thật.*
-
-1. Cấu hình thông số Merchant Sandbox vào file `.env`:
-   ```ini
-   PAYMENT_MOCK_ENABLED=false
-   VNPAY_TMN_CODE=CGXZLS0Z
-   VNPAY_HASH_SECRET=XNBCJFAKAZQSGTARRLKNOAKXZTCXMSKZ
-   VNPAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-   VNPAY_RETURN_URL=http://localhost/payment/vnpay/return
-   ```
-2. Khi chuyển hướng sang VNPay Sandbox, chọn **Thẻ ATM & Tài khoản ngân hàng**, nhập thông tin thẻ test của VNPay:
-
-| Thông tin | Giá trị thẻ test |
-|---|---|
-| **Ngân hàng** | **NCB** (Ngân hàng Quốc Dân) |
-| **Số thẻ** | `9704198526191432198` |
-| **Tên chủ thẻ** | `NGUYEN VAN A` |
-| **Ngày phát hành** | `07/15` |
-| **Mật khẩu OTP** | `123456` |
-
----
-
-### Kịch bản 3: Triển khai thực tế lên Internet (Production)
+### Chế độ 2: Triển khai thực tế lên Internet (Production)
 *Khi đưa website lên môi trường thực tế cho khách hàng thật sử dụng.*
 
 **Quy tắc an toàn cốt lõi:** Tuyệt đối không cho phép truy cập cổng giả lập trên môi trường Production. Hệ thống đã có cơ chế tự động bảo vệ:
@@ -187,14 +164,14 @@ SportZone xây dựng kiến trúc cổng thanh toán đa chế độ (*Multi-mo
 1. Trên server Production, đặt file `.env`:
    ```ini
    PAYMENT_MOCK_ENABLED=false
-   # Nếu chưa ký hợp đồng với VNPay: để trống thông tin VNPay
+   # Khi chưa ký hợp đồng với cổng thanh toán: để trống thông tin Merchant
    VNPAY_TMN_CODE=
    VNPAY_HASH_SECRET=
    ```
 2. **Hệ thống tự động kích hoạt chế độ an toàn:**
    - Mọi nỗ lực truy cập vào các đường dẫn giả lập `/payment/mock/*` đều bị chặn ngay lập tức và trả về mã lỗi **404 Not Found** (thông qua hàm bảo vệ `_require_mock()`).
    - Tại trang Đặt hàng (`/account/checkout`), tùy chọn *Thanh toán trực tuyến* tự động bị vô hiệu hóa do hệ thống nhận diện chưa có cổng thanh toán thật. Khách hàng chỉ có thể chọn **Thanh toán khi nhận hàng (COD)**.
-   - Khi doanh nghiệp ký kết hợp đồng chính thức với VNPay, chỉ cần điền thông tin Merchant thực tế vào `.env`, cổng thanh toán thật sẽ tự động hoạt động mà **không cần chỉnh sửa mã nguồn**.
+   - Khi doanh nghiệp hoàn tất ký kết hợp đồng chính thức với cổng thanh toán VNPay, chỉ cần điền thông tin Merchant thực tế vào `.env`, cổng thanh toán thật sẽ tự động kích hoạt mà **không cần chỉnh sửa bất kỳ dòng code nào**.
 
 ---
 
@@ -318,10 +295,10 @@ Hệ thống quản lý cấu hình thông qua các biến môi trường trong 
 | `FLASK_ENV` | Chế độ chạy của ứng dụng Flask | `development` | `production` |
 | `SECRET_KEY` | Khóa bí mật mã hóa Session & CSRF | Tùy ý khi test | **Chuỗi ngẫu nhiên bảo mật cao** |
 | `DATABASE_URL` | Chuỗi kết nối CSDL | Để trống *(dùng SQLite)* | `mysql+pymysql://user:pass@host/dbname` |
-| `PAYMENT_MOCK_ENABLED` | Kích hoạt cổng thanh toán giả lập | `true` *(để demo)* | **`false` *(tự động khóa cổng giả lập)*** |
-| `VNPAY_TMN_CODE` | Mã định danh Merchant VNPay | `CGXZLS0Z` *(sandbox)* | Mã do VNPay cấp chính thức |
-| `VNPAY_HASH_SECRET` | Khóa bí mật tạo chữ ký số VNPay | Khóa sandbox | Khóa do VNPay cấp chính thức |
-| `VNPAY_URL` | Đường dẫn API cổng thanh toán | URL sandbox | URL Production của VNPay |
+| `PAYMENT_MOCK_ENABLED` | Kích hoạt cổng thanh toán giả lập | `true` *(để demo đồ án)* | **`false` *(tự động khóa cổng giả lập)*** |
+| `VNPAY_TMN_CODE` | Mã định danh Merchant VNPay | Để trống | Mã do VNPay cấp khi ký hợp đồng |
+| `VNPAY_HASH_SECRET` | Khóa bí mật tạo chữ ký số VNPay | Để trống | Khóa do VNPay cấp khi ký hợp đồng |
+| `VNPAY_URL` | Đường dẫn API cổng thanh toán | URL sandbox/test | URL Production của VNPay |
 | `VNPAY_RETURN_URL` | URL nhận kết quả trả về từ cổng | `http://localhost/payment/vnpay/return` | Domain thật của website |
 | `MAIL_SERVER` | Địa chỉ máy chủ gửi email SMTP | `localhost` | `smtp.gmail.com` hoặc SendGrid |
 | `MAIL_USERNAME` | Tài khoản gửi thư thông báo | Để trống *(chỉ log console)* | Email quản trị |
