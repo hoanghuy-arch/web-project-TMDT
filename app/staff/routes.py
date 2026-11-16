@@ -87,6 +87,17 @@ def order_ship(order_code):
                     carrier_id, request.form.get("tracking_code", ""))
 
 
+@bp.route("/orders/<order_code>/ship-ghn", methods=["POST"])
+@permission_required(Perm.SHIPMENT_UPDATE)
+def order_ship_ghn(order_code):
+    service_code = request.form.get("service_code", "GHN_STANDARD")
+    required_note = request.form.get("required_note", "CHOXEMHANGKHONGTHU")
+    note = request.form.get("note", "")
+    return _perform(order_code, fulfillment_service.ship_order_ghn,
+                    lambda s: f"Đã kết nối và bàn giao cho {s.carrier.name}! Mã vận đơn GHN: {s.tracking_code}.",
+                    service_code, required_note, note)
+
+
 @bp.route("/orders/<order_code>/deliver", methods=["POST"])
 @permission_required(Perm.SHIPMENT_UPDATE)
 def order_deliver(order_code):

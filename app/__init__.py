@@ -74,12 +74,37 @@ def _register_error_handlers(app):
         return _render(429, "Thao tác quá nhanh", "Bạn gửi yêu cầu quá nhiều lần. Vui lòng thử lại sau ít phút.")
 
     @app.errorhandler(500)
-    def server_error(_e):
+    def server_error(e):
         db.session.rollback()
+        app.logger.exception("Lỗi 500:", exc_info=e)
         return _render(500, "Lỗi hệ thống", "Đã có lỗi xảy ra. Vui lòng thử lại sau.")
 
 
 def _register_hooks(app):
+    _schema_migrated = False
+
+    @app.before_request
+    def check_schema_updates():
+        nonlocal _schema_migrated
+        if _schema_migrated or app.config.get("TESTING"):
+            return
+        _schema_migrated = True
+        try:
+            with db.engine.connect() as conn:
+                for col_name, col_type in [
+                    ("service_name", "VARCHAR(100)"),
+                    ("expected_delivery_at", "DATETIME"),
+                    ("label_url", "VARCHAR(255)")
+                ]:
+                    try:
+                        conn.execute(db.text(f"ALTER TABLE shipment ADD COLUMN {col_name} {col_type}"))
+                        conn.commit()
+                        app.logger.info(f"Đã bổ sung cột {col_name} vào bảng shipment.")
+                    except Exception:
+                        pass
+        except Exception as e:
+            app.logger.warning(f"Lỗi kiểm tra schema tự động: {e}")
+
     @app.after_request
     def security_headers(resp):
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")

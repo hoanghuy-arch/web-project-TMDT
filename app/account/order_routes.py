@@ -24,13 +24,15 @@ def checkout():
     promo_code = request.form.get("promo_code", "") if posting else ""
     method = request.form.get("payment_method", PaymentMethod.COD) if posting else PaymentMethod.COD
     note = request.form.get("note", "")[:500] if posting else ""
+    shipping_service_code = request.form.get("shipping_service_code", "GHN_STANDARD") if posting else "GHN_STANDARD"
 
     if posting and request.form.get("action") == "place":
         if method == PaymentMethod.VNPAY and not online_payment_enabled():
             flash("Thanh toán online hiện chưa khả dụng. Vui lòng chọn thanh toán khi nhận hàng.", "danger")
         else:
             try:
-                order = order_service.place_order(current_user, address_id, promo_code, method, note)
+                order = order_service.place_order(current_user, address_id, promo_code, method, note,
+                                                  shipping_service_code=shipping_service_code)
             except CheckoutError as e:
                 flash(str(e), "danger")
             else:
@@ -39,7 +41,8 @@ def checkout():
                 flash(f"Đặt hàng thành công! Mã đơn của bạn là {order.order_code}.", "success")
                 return redirect(url_for("account.order_detail", order_code=order.order_code))
 
-    summary = order_service.build_checkout(current_user, address_id, promo_code)
+    summary = order_service.build_checkout(current_user, address_id, promo_code,
+                                          shipping_service_code=shipping_service_code)
     if not summary.cart.lines:
         flash("Giỏ hàng của bạn đang trống.", "info")
         return redirect(url_for("account.cart"))
@@ -68,11 +71,24 @@ def orders():
 @customer_required
 def order_detail(order_code):
     order = order_service.get_owned_order(current_user, order_code)
+    from app.services import ghn_service
+    tracking = ghn_service.get_tracking_timeline(order)
     return render_template("account/order_detail.html", order=order, can_cancel=order_service.can_customer_cancel(order),
                            deadline=order_service.payment_deadline(order), online_enabled=online_payment_enabled(),
                            return_blocker=return_service.request_blocker(order),
                            return_deadline=return_service.return_deadline(order) if order.status == OrderStatus.COMPLETED else None,
-                           can_review=order.status in review_service.REVIEWABLE_STATUSES)
+                           can_review=order.status in review_service.REVIEWABLE_STATUSES,
+                           tracking=tracking)
+
+
+@bp.route("/orders/<order_code>/shipping-label")
+def order_shipping_label(order_code):
+    """Xem và in phiếu giao hàng A5 chính thức (chuẩn Barcode GHN)."""
+    from app.models import SalesOrder
+    order = SalesOrder.query.filter_by(order_code=order_code).first_or_404()
+    from app.services import ghn_service
+    tracking = ghn_service.get_tracking_timeline(order)
+    return render_template("account/shipping_label.html", order=order, tracking=tracking)
 
 
 @bp.route("/orders/<order_code>/cancel", methods=["POST"])

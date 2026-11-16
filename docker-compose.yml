@@ -50,8 +50,9 @@ services:
       FLASK_ENV: development   # đổi thành production khi deploy thật
       SECRET_KEY: "THAY-BANG-CHUOI-BÍ-MẬT-NGẪU-NHIÊN-DÀI-TRONG-PRODUCTION"
       DATABASE_URL: "mysql+pymysql://sportzone:sportzone123@db:3306/sportzone?charset=utf8mb4"
-      PAYMENT_MOCK_ENABLED: "true"       # demo/sandbox; đặt false và điền VNPay thật để production
-      PAYMENT_SANDBOX_MODE: "true"
+      GHN_API_URL: "https://dev-online-gateway.ghn.vn/shiip/public-api"
+      GHN_FROM_DISTRICT_ID: "1454"
+      GHN_FROM_WARD_CODE: "21211"
       RATELIMIT_STORAGE_URI: "memory://" # đổi sang redis:// khi scale nhiều container
       MAIL_SUPPRESS_SEND: "true"         # chưa cấu hình SMTP: ghi log thay vì gửi thật
       # Bỏ comment và điền giá trị thật khi muốn gửi email thật:

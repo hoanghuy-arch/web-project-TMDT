@@ -65,6 +65,22 @@ def ship_order(order, actor, carrier_id, tracking_code):
     return order.shipment
 
 
+def ship_order_ghn(order, actor, service_code="GHN_STANDARD", required_note="CHOXEMHANGKHONGTHU", note=None):
+    """Bàn giao tự động qua GHN Open API: tự sinh mã vận đơn, tạo shipment và xuất kho."""
+    from app.services import ghn_service
+    carrier = ghn_service.get_active_ghn_carrier()
+
+    def hand_over():
+        ghn_service.create_shipping_order(order, service_code=service_code, note=note, required_note=required_note)
+        inventory_service.issue_for_order(order, actor)
+
+    try:
+        _transition(order, OrderStatus.SHIPPING, actor, f"Bàn giao tự động cho {carrier.name} qua API", hand_over)
+    except Exception as e:
+        raise FulfillmentError(f"Lỗi tạo đơn vận chuyển với GHN: {e}")
+    return order.shipment
+
+
 def mark_delivered(order, actor):
     """Đang giao -> Hoàn thành. Đơn COD: ghi nhận đã thu tiền khi giao thành công."""
     def finish():

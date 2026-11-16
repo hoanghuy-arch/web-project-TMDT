@@ -39,27 +39,59 @@
           </form>
 
         {% elif status == 'PACKING' and can_ship %}
-          <form method="post" action="{{ url_for('staff.order_ship', order_code=order.order_code) }}" class="mb-3">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="row g-2 align-items-end">
-              <div class="col-md-4">
-                <label for="carrier_id" class="form-label small mb-1">Đơn vị vận chuyển</label>
-                <select name="carrier_id" id="carrier_id" class="form-select form-select-sm" required>
-                  <option value="">-- Chọn --</option>
-                  {% for c in carriers %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
-                </select>
-              </div>
-              <div class="col-md-5">
-                <label for="tracking_code" class="form-label small mb-1">Mã vận đơn</label>
-                <input type="text" name="tracking_code" id="tracking_code" class="form-control form-control-sm" maxlength="60" required>
-              </div>
-              <div class="col-md-3">
-                <button class="btn btn-sz btn-sm w-100" type="submit"><i class="bi bi-truck"></i> Bàn giao</button>
-              </div>
+          <!-- TỰ ĐỘNG ĐẨY ĐƠN SANG GHN QUA API -->
+          <div class="card bg-light border-danger border-opacity-50 mb-3 shadow-none">
+            <div class="card-body">
+              <h6 class="card-title text-danger fw-bold mb-2"><i class="bi bi-lightning-charge-fill me-1"></i> Bàn giao tự động qua GHN </h6>
+              <form method="post" action="{{ url_for('staff.order_ship_ghn', order_code=order.order_code) }}" class="row g-2 align-items-end">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="col-md-5">
+                  <label class="form-label small mb-1">Gói cước GHN</label>
+                  <select name="service_code" class="form-select form-select-sm">
+                    <option value="GHN_STANDARD">Giao Tiêu Chuẩn (GHN Standard)</option>
+                    <option value="GHN_EXPRESS">Giao Hỏa Tốc (GHN Express)</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small mb-1">Lưu ý bưu tá</label>
+                  <select name="required_note" class="form-select form-select-sm">
+                    <option value="CHOXEMHANGKHONGTHU">Cho xem hàng, không thử</option>
+                    <option value="CHOTHUHANG">Cho thử hàng</option>
+                    <option value="KHONGCHOXEMHANG">Không cho xem hàng</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <button class="btn btn-danger btn-sm w-100 fw-semibold" type="submit">
+                    <i class="bi bi-send-fill me-1"></i> Bắn đơn GHN
+                  </button>
+                </div>
+              </form>
+              <div class="small text-muted mt-2"><i class="bi bi-info-circle me-1"></i>Hệ thống tự động cấp mã vận đơn thật từ GHN và xuất kho trừ tồn.</div>
             </div>
-            {% if not carriers %}<div class="small text-danger mt-1">Chưa có đơn vị vận chuyển nào đang hoạt động. Quản trị viên cần thêm đơn vị vận chuyển.</div>{% endif %}
-            <div class="form-text">Bàn giao sẽ xuất kho: trừ tồn kho và giải phóng lượng đang giữ của đơn này.</div>
-          </form>
+          </div>
+
+          <details class="mb-3">
+            <summary class="small text-secondary cursor-pointer">Hoặc nhập mã vận đơn thủ công</summary>
+            <form method="post" action="{{ url_for('staff.order_ship', order_code=order.order_code) }}" class="mt-2 p-2 border rounded bg-white">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                  <label for="carrier_id" class="form-label small mb-1">Đơn vị vận chuyển</label>
+                  <select name="carrier_id" id="carrier_id" class="form-select form-select-sm" required>
+                    <option value="">-- Chọn --</option>
+                    {% for c in carriers %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-5">
+                  <label for="tracking_code" class="form-label small mb-1">Mã vận đơn</label>
+                  <input type="text" name="tracking_code" id="tracking_code" class="form-control form-control-sm" maxlength="60" required>
+                </div>
+                <div class="col-md-3">
+                  <button class="btn btn-outline-secondary btn-sm w-100" type="submit"><i class="bi bi-truck"></i> Lưu</button>
+                </div>
+              </div>
+            </form>
+          </details>
 
         {% elif status == 'SHIPPING' and can_ship %}
           <form method="post" action="{{ url_for('staff.order_deliver', order_code=order.order_code) }}" class="mb-3"
@@ -151,11 +183,20 @@
         {% if order.shipment %}
         <div class="card border-0 shadow-sm mb-3">
           <div class="card-body">
-            <h2 class="h6 mb-2">Vận chuyển</h2>
-            <div class="small"><i class="bi bi-truck"></i> {{ order.shipment.carrier.name }}</div>
-            <div class="small">Mã vận đơn: <strong>{{ order.shipment.tracking_code }}</strong></div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h2 class="h6 mb-0">Vận chuyển</h2>
+              <a href="{{ url_for('account.order_shipping_label', order_code=order.order_code) }}" target="_blank" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-printer-fill me-1"></i> In phiếu A5
+              </a>
+            </div>
+            <div class="small"><i class="bi bi-truck text-danger"></i> <strong>{{ order.shipment.carrier.name }}</strong></div>
+            <div class="small">Gói cước: <span class="badge text-bg-secondary">{{ order.shipment.service_name or 'GHN Tiêu Chuẩn' }}</span></div>
+            <div class="small">Mã vận đơn: <code class="fw-bold fs-6 text-danger">{{ order.shipment.tracking_code }}</code></div>
             <div class="small text-muted">Bàn giao: {{ order.shipment.shipped_at | dt }}</div>
-            {% if order.shipment.delivered_at %}<div class="small text-success">Giao thành công: {{ order.shipment.delivered_at | dt }}</div>{% endif %}
+            {% if order.shipment.expected_delivery_at %}
+              <div class="small text-primary"><i class="bi bi-calendar-check me-1"></i>Dự kiến giao: {{ order.shipment.expected_delivery_at | dt }}</div>
+            {% endif %}
+            {% if order.shipment.delivered_at %}<div class="small text-success fw-bold"><i class="bi bi-check-circle me-1"></i>Giao thành công: {{ order.shipment.delivered_at | dt }}</div>{% endif %}
           </div>
         </div>
         {% endif %}

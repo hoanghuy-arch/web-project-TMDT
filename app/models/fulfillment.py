@@ -40,6 +40,9 @@ class Shipment(db.Model):
     sales_order_id = db.Column(db.Integer, db.ForeignKey("sales_order.id"), primary_key=True)
     carrier_id = db.Column(db.Integer, db.ForeignKey("carrier.id"), nullable=False, index=True)
     tracking_code = db.Column(db.String(60), nullable=False)
+    service_name = db.Column(db.String(100))                               # R21: tên gói cước (ví dụ: GHN Tiêu chuẩn)
+    expected_delivery_at = db.Column(db.DateTime)                          # ngày giờ dự kiến giao
+    label_url = db.Column(db.String(255))                                  # link in phiếu giao hàng
     shipped_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     delivered_at = db.Column(db.DateTime)
 

@@ -19,7 +19,7 @@ from app.extensions import db
 from app.models import (Address, AppSetting, Payment, ProductVariant, ReturnRequest, SalesOrder, SalesOrderItem,
                         SalesOrderStatusHistory)
 from app.models.base import utcnow
-from app.services import (address_service, audit_service, cart_service, inventory_service, promotion_service,
+from app.services import (address_service, audit_service, cart_service, ghn_service, inventory_service, promotion_service,
                           shipping_service)
 from app.services.cart_view import CartView
 from app.services.errors import (CheckoutError, ConcurrentUpdateError, OrderStateError, PromotionError)
@@ -37,6 +37,9 @@ class CheckoutSummary:
     discount: Decimal = Decimal(0)
     shipping_fee: Decimal = Decimal(0)
     free_shipping: bool = False
+    shipping_options: list = None
+    selected_shipping_code: str = "GHN_STANDARD"
+    selected_shipping_option: object = None
 
     @property
     def subtotal(self):
@@ -55,7 +58,7 @@ def pick_address(addresses, address_id):
     return next((a for a in addresses if a.is_default), addresses[0] if addresses else None)
 
 
-def build_checkout(account, address_id=None, promo_code=""):
+def build_checkout(account, address_id=None, promo_code="", shipping_service_code="GHN_STANDARD"):
     """Tính trước tiền hàng, giảm giá, phí vận chuyển để hiển thị. Không ghi gì vào DB, không giữ hàng."""
     cart = cart_service.get_cart(account)
     address = pick_address(address_service.list_active_addresses(account), address_id)
@@ -67,8 +70,17 @@ def build_checkout(account, address_id=None, promo_code=""):
         except PromotionError as e:
             summary.promo_error = str(e)
     if address is not None:
-        q = shipping_service.quote(address.ward.province_id, cart.subtotal)
-        summary.shipping_fee, summary.free_shipping = q.fee, q.free
+        opts = ghn_service.calculate_shipping_options(address, cart.subtotal)
+        summary.shipping_options = opts
+        chosen = next((o for o in opts if o.code == shipping_service_code), opts[0]) if opts else None
+        if chosen:
+            summary.selected_shipping_code = chosen.code
+            summary.selected_shipping_option = chosen
+            summary.shipping_fee = chosen.fee
+            summary.free_shipping = chosen.is_free
+        else:
+            q = shipping_service.quote(address.ward.province_id, cart.subtotal)
+            summary.shipping_fee, summary.free_shipping = q.fee, q.free
     return summary
 
 
@@ -103,7 +115,7 @@ def _new_order_code():
     raise RuntimeError("Không sinh được mã đơn duy nhất")
 
 
-def place_order(account, address_id, promo_code, payment_method, note=None):
+def place_order(account, address_id, promo_code, payment_method, note=None, shipping_service_code="GHN_STANDARD"):
     """Tạo đơn từ giỏ hàng, giữ hàng, ghi lịch sử và thanh toán, xóa giỏ, tất cả trong một transaction.
     COD -> chờ xác nhận. Online -> chờ thanh toán (hết hạn sau thời gian giữ hàng cấu hình, mặc định 15 phút)."""
     if payment_method not in PaymentMethod.ALL:
@@ -124,14 +136,17 @@ def place_order(account, address_id, promo_code, payment_method, note=None):
         code = promotion_service.normalize_code(promo_code)
         if code:
             promotion, discount = promotion_service.evaluate(code, cart.subtotal, lock=True)
-        quote = shipping_service.quote(address.ward.province_id, cart.subtotal)
+
+        opts = ghn_service.calculate_shipping_options(address, cart.subtotal)
+        chosen = next((o for o in opts if o.code == shipping_service_code), opts[0]) if opts else None
+        shipping_fee = chosen.fee if chosen else shipping_service.quote(address.ward.province_id, cart.subtotal).fee
 
         online = payment_method == PaymentMethod.VNPAY
         status = OrderStatus.PENDING_PAYMENT if online else OrderStatus.PENDING_CONFIRM
         order = SalesOrder(
             order_code=_new_order_code(), account_id=account.id, address_id=address.id,
             promotion_id=promotion.id if promotion else None, status=status,
-            discount_amount=discount, shipping_fee=quote.fee, note=(note or "").strip()[:500] or None)
+            discount_amount=discount, shipping_fee=shipping_fee, note=(note or "").strip()[:500] or None)
         for line in cart.lines:
             # Giá chốt tại thời điểm đặt (BR05)
             order.items.append(SalesOrderItem(product_variant_id=line.variant.id, quantity=line.quantity,

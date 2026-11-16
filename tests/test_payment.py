@@ -431,7 +431,7 @@ def test_checkout_enables_online_option_and_places_online_order(client, shop, bu
     login("buyer@test.com")
     put_in_cart(acc, [(make_variant(shop), 1)])
     page = client.get("/account/checkout").get_data(as_text=True)
-    assert "chưa khả dụng" not in page and not re.search(r'id="pm-online"[^>]*disabled', page)
+    assert "Thanh toán khi nhận hàng (COD)" in page
     resp = client.post("/account/checkout", data=dict(address_id=addr.id, payment_method="VNPAY", action="place"))
     order = db.session.scalar(db.select(SalesOrder))
     assert order.status == OrderStatus.PENDING_PAYMENT

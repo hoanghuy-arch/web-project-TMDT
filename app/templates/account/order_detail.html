@@ -22,6 +22,34 @@
     </div>
     {% endif %}
 
+    <!-- TIMELINE TIẾN TRÌNH VẬN CHUYỂN CHUẨN SÀN TMĐT -->
+    {% if tracking %}
+    <div class="card shadow-sm border-0 mb-4 overflow-hidden">
+      <div class="card-body py-4 px-3 px-md-5">
+        <div class="position-relative my-3">
+          <div class="progress" style="height: 4px;">
+            <div class="progress-bar bg-success" role="progressbar"
+                 style="width: {{ (tracking.current_step_idx / (tracking.steps|length - 1) * 100) if tracking.current_step_idx >= 0 else 0 }}%;"></div>
+          </div>
+          <div class="d-flex justify-content-between position-absolute top-50 start-0 translate-middle-y w-100">
+            {% for s in tracking.steps %}
+            <div class="text-center" style="width: 70px; margin-left: -35px; margin-right: -35px;">
+              <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-1 shadow-sm
+                          {{ 'bg-success text-white' if s.is_done or s.is_current else 'bg-white border text-muted' }}"
+                   style="width: 38px; height: 38px; z-index: 2; position: relative;">
+                <i class="bi {{ s.icon }} fs-6"></i>
+              </div>
+              <div class="small fw-semibold {{ 'text-success' if s.is_current else ('text-dark' if s.is_done else 'text-muted') }}" style="font-size: 0.72rem; line-height: 1.2;">
+                {{ s.label }}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     <div class="row g-3">
       <div class="col-md-7">
         <div class="card shadow-sm border-0 mb-3">
@@ -48,16 +76,63 @@
           </div>
         </div>
 
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-sm border-0 mb-3">
           <div class="card-body">
-            <h2 class="h6 mb-3">Giao hàng đến</h2>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="h6 mb-0"><i class="bi bi-truck text-danger me-1"></i> Thông tin vận chuyển (GHN)</h2>
+              {% if order.shipment %}
+                <a href="{{ url_for('account.order_shipping_label', order_code=order.order_code) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-printer me-1"></i> In phiếu giao hàng
+                </a>
+              {% endif %}
+            </div>
+
+            {% if order.shipment %}
+              <div class="p-3 bg-light rounded-3 mb-3 border">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                  <div>
+                    <div class="small text-muted">Đơn vị vận chuyển:</div>
+                    <strong>{{ order.shipment.carrier.name }}</strong> &middot; <span class="badge text-bg-secondary">{{ order.shipment.service_name or 'Giao Tiêu Chuẩn' }}</span>
+                  </div>
+                  <div>
+                    <div class="small text-muted">Mã vận đơn:</div>
+                    <code class="fs-6 fw-bold text-danger">{{ order.shipment.tracking_code }}</code>
+                  </div>
+                </div>
+                {% if order.shipment.expected_delivery_at %}
+                  <div class="small text-muted mt-2">
+                    <i class="bi bi-calendar-check text-success me-1"></i> Dự kiến nhận hàng: <strong>{{ order.shipment.expected_delivery_at | dt }}</strong>
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+
+            <!-- Lịch sử hành trình kiện hàng -->
+            {% if tracking and tracking.logs %}
+            <h3 class="h6 text-muted mb-3" style="font-size: 0.85rem;"><i class="bi bi-clock-history me-1"></i> Lịch sử hành trình kiện hàng</h3>
+            <div class="timeline position-relative ps-3 border-start border-2 border-danger ms-2 mb-4">
+              {% for log in tracking.logs %}
+              <div class="mb-3 position-relative">
+                <div class="position-absolute rounded-circle {{ 'bg-danger' if log.is_highlight else 'bg-secondary' }}"
+                     style="width: 10px; height: 10px; left: -21px; top: 6px;"></div>
+                <div class="small fw-bold {{ 'text-danger' if log.is_highlight else 'text-dark' }}">
+                  {{ log.title }}
+                  <span class="text-muted fw-normal ms-2" style="font-size: 0.75rem;">{{ log.time | dt }}</span>
+                </div>
+                <div class="small text-muted">{{ log.desc }}</div>
+                {% if log.hub %}
+                  <div class="small text-secondary fst-italic" style="font-size: 0.75rem;"><i class="bi bi-geo-alt me-1"></i>{{ log.hub }}</div>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            <hr>
+            <h2 class="h6 mb-2">Địa chỉ giao hàng</h2>
             <div><strong>{{ order.address.recipient_name }}</strong> &middot; {{ order.address.phone }}</div>
             <div class="text-muted small">{{ order.address.full_address }}</div>
             {% if order.note %}<div class="small mt-2"><span class="text-muted">Ghi chú:</span> {{ order.note }}</div>{% endif %}
-            {% if order.shipment %}
-              <hr>
-              <div class="small"><i class="bi bi-truck"></i> {{ order.shipment.carrier.name }} &middot; Mã vận đơn: <strong>{{ order.shipment.tracking_code }}</strong></div>
-            {% endif %}
           </div>
         </div>
       </div>

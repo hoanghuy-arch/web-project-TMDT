@@ -40,6 +40,13 @@ class Config:
     RATELIMIT_FORGOT_PASSWORD = "10 per hour"
     RATELIMIT_RESET_PASSWORD = "20 per hour"
 
+    # --- Đơn vị vận chuyển GHN (Giao Hàng Nhanh Open API) ---
+    GHN_API_URL = os.environ.get("GHN_API_URL", "https://dev-online-gateway.ghn.vn/shiip/public-api")
+    GHN_API_TOKEN = os.environ.get("GHN_API_TOKEN", "")
+    GHN_SHOP_ID = os.environ.get("GHN_SHOP_ID", "")
+    GHN_FROM_DISTRICT_ID = int(os.environ.get("GHN_FROM_DISTRICT_ID", "1454"))   # Quận 1, TP.HCM
+    GHN_FROM_WARD_CODE = os.environ.get("GHN_FROM_WARD_CODE", "21211")           # Phường Bến Nghé
+
     # --- Email (Flask-Mail) ---
     MAIL_SERVER = os.environ.get("MAIL_SERVER", "localhost")
     MAIL_PORT = int(os.environ.get("MAIL_PORT", 25))

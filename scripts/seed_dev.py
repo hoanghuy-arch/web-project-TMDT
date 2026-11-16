@@ -339,6 +339,22 @@ def main():
         print("  SportZone — Seed dữ liệu phát triển")
         print("=" * 55)
 
+        # Đảm bảo các cột bổ sung của Shipment tồn tại trên CSDL
+        try:
+            with db.engine.connect() as conn:
+                for col_name, col_type in [
+                    ("service_name", "VARCHAR(100)"),
+                    ("expected_delivery_at", "DATETIME"),
+                    ("label_url", "VARCHAR(255)")
+                ]:
+                    try:
+                        conn.execute(db.text(f"ALTER TABLE shipment ADD COLUMN {col_name} {col_type}"))
+                        conn.commit()
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
         roles, perms = seed_roles_and_permissions()
         accounts      = seed_accounts(roles)
         hcm, hn, w1   = seed_geography()

@@ -1,7 +1,7 @@
 """Phân hệ C: giỏ hàng, khuyến mãi, đơn hàng
 (cart_item, promotion, sales_order, sales_order_item, sales_order_status_history).
 Cột khớp ERD Phân hệ C."""
-from app.constants import DiscountType, EntityStatus, OrderStatus, can_transition
+from app.constants import DiscountType, EntityStatus, OrderStatus, PaymentMethod, can_transition
 from app.extensions import db
 from app.models.base import Money, TimestampMixin, in_list, make_append_only, utcnow
 
@@ -117,6 +117,10 @@ class SalesOrder(TimestampMixin, db.Model):
     def payment_method(self):
         p = self.latest_payment
         return p.method if p else None
+
+    @property
+    def is_cod(self):
+        return self.payment_method == PaymentMethod.COD
 
     @property
     def total_quantity(self):
