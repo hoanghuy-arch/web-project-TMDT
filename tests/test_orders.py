@@ -460,7 +460,7 @@ def test_checkout_page_shows_summary(client, shop, logged_in):
     body = client.get("/account/checkout").get_data(as_text=True)
     assert "1 Lê Lợi, Phường Bến Nghé" in body and f'value="{addr.id}"' in body and "checked" in body
     assert "250.000 ₫" in body and "30.000 ₫" in body and "280.000 ₫" in body       # tạm tính, phí ship, tổng
-    assert "chưa khả dụng" in body and 'id="pm-online" value="VNPAY"' in body and "disabled" in body
+    assert 'id="pm-cod" value="COD"' in body and "checked" in body
 
 
 def test_checkout_apply_promo_previews_without_creating_order(client, shop, logged_in):

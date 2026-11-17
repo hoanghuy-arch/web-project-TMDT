@@ -22,7 +22,7 @@ def base_data(app):
     prov = Province(name="TP. Hồ Chí Minh")
     ward = Ward(province=prov, name="Phường Tân Hưng")
     cat = Category(name="Áo", slug="ao")
-    size, color = Size(name="M"), Color(name="Đen")
+    size, color = Size(name="M"), Color(name="Đen", hex_code="#000000")
     db.session.add_all([prov, ward, cat, size, color])
     db.session.flush()
 
