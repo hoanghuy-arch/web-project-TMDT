@@ -56,7 +56,7 @@
                 <td>
                   <div class="d-flex align-items-center">
                     {% if p.primary_image %}
-                    <img src="{{ p.primary_image.url }}" class="rounded me-2 border" style="width: 45px; height: 45px; object-fit: cover;" alt="">
+                    <img src="{{ p.primary_image.url | image_url }}" class="rounded me-2 border" style="width: 45px; height: 45px; object-fit: cover;" alt="">
                     {% else %}
                     <div class="bg-light rounded me-2 border d-flex align-items-center justify-content-center text-muted" style="width: 45px; height: 45px;">
                       <i class="bi bi-image"></i>

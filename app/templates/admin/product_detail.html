@@ -43,7 +43,7 @@
           {% for img in product.images %}
           <div class="col-6 col-md-3">
             <div class="card border position-relative h-100">
-              <img src="{{ img.url }}" class="card-img-top" style="height: 140px; object-fit: cover;" alt="">
+              <img src="{{ img.url | image_url }}" class="card-img-top" style="height: 140px; object-fit: cover;" alt="">
               <div class="card-body p-2 text-center">
                 {% if img.is_primary %}
                 <span class="badge text-bg-primary mb-1">Ảnh đại diện</span>
