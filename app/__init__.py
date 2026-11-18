@@ -1,10 +1,20 @@
 """Application factory của SportZone."""
+import sqlite3
 from flask import Flask, jsonify, render_template, request
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 
 from config import get_config
 from app.extensions import csrf, db, limiter, login_manager, mail, migrate
 from app.logging_config import configure_logging
 from app.utils.formatters import register_filters
+
+
+# Cấu hình SQLite hỗ trợ hàm lower() cho chuỗi Unicode tiếng Việt có dấu
+@event.listens_for(Engine, "connect")
+def _setup_sqlite_connection(dbapi_conn, connection_record):
+    if isinstance(dbapi_conn, sqlite3.Connection):
+        dbapi_conn.create_function("lower", 1, lambda s: s.lower() if s else s)
 
 
 def create_app(config_name=None):

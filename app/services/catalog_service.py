@@ -1,4 +1,7 @@
 """Truy vấn sản phẩm cho khu vực cửa hàng (FR-KH05, FR-KH06). Chỉ đọc dữ liệu."""
+import re
+import unicodedata
+
 from flask import abort, current_app
 from sqlalchemy import exists, func, or_, select
 from sqlalchemy.orm import joinedload, selectinload
@@ -7,6 +10,15 @@ from app.constants import EntityStatus, OrderStatus, SettingKey
 from app.extensions import db
 from app.models import (AppSetting, Category, Color, Product, ProductVariant, Review, SalesOrder,
                         SalesOrderItem, Size)
+
+
+def _remove_accents(text: str) -> str:
+    """Chuyển chuỗi tiếng Việt có dấu thành không dấu để hỗ trợ tìm kiếm linh hoạt."""
+    if not text:
+        return ""
+    normalized = unicodedata.normalize("NFD", text)
+    stripped = re.sub(r"[\u0300-\u036f]", "", normalized)
+    return stripped.replace("đ", "d").replace("Đ", "D").lower()
 
 
 # ------------------------------------------------------------------ điều kiện hiển thị
@@ -93,8 +105,26 @@ def search_products(filters, category_ids=None):
         stmt = stmt.where(Product.category_id.in_(category_ids))
 
     for term in filters.terms:
-        stmt = stmt.where(or_(Product.name.contains(term, autoescape=True),
-                              Product.description.contains(term, autoescape=True)))
+        term_clean = term.strip()
+        if not term_clean:
+            continue
+        term_lower = term_clean.lower()
+        slug_term = _remove_accents(term_lower)
+
+        # Hỗ trợ tìm kiếm thông minh: tiếng Việt có dấu, mô tả, và từ khóa không dấu trong slug
+        conds = [
+            func.lower(Product.name).contains(term_lower, autoescape=True),
+            func.lower(Product.description).contains(term_lower, autoescape=True),
+        ]
+        # Nếu có từ khóa không dấu hợp lệ (không chứa ký tự wildcard % _)
+        if slug_term and not any(c in "%_\\ " for c in slug_term):
+            conds.extend([
+                Product.slug == slug_term,
+                Product.slug.like(f"{slug_term}-%"),
+                Product.slug.like(f"%-{slug_term}-%"),
+                Product.slug.like(f"%-{slug_term}"),
+            ])
+        stmt = stmt.where(or_(*conds))
 
     if filters.sizes or filters.colors or filters.in_stock:
         stmt = stmt.where(_variant_exists(filters))
