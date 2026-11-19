@@ -25,17 +25,18 @@ depends_on = None
 def upgrade():
     bind = op.get_bind()
     if bind.dialect.name == 'mysql':
-        # MySQL: dùng raw SQL để drop index (batch_alter_table không hoạt động trên MySQL)
-        try:
-            op.execute(sa.text("ALTER TABLE ward DROP INDEX uq_ward_province_name"))
-        except Exception:
-            pass  # Index không tồn tại → bỏ qua
+        # MySQL: tạo index thường cho province_id trước (để làm supporting index cho FK),
+        # sau đó mới drop unique index uq_ward_province_name.
         try:
             op.execute(sa.text(
                 "ALTER TABLE ward ADD INDEX ix_ward_province_id (province_id)"
             ))
         except Exception:
-            pass  # Index đã tồn tại → bỏ qua
+            pass
+        try:
+            op.execute(sa.text("ALTER TABLE ward DROP INDEX uq_ward_province_name"))
+        except Exception:
+            pass
     else:
         # SQLite và các DB khác: dùng batch mode
         try:
