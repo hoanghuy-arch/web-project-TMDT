@@ -23,28 +23,54 @@ depends_on = None
 
 
 def upgrade():
-    try:
-        with op.batch_alter_table('ward', schema=None) as batch_op:
-            batch_op.drop_constraint('uq_ward_province_name', type_='unique')
-    except Exception:
-        pass
-
-    try:
-        with op.batch_alter_table('ward', schema=None) as batch_op:
-            batch_op.create_index('ix_ward_province_id', ['province_id'], unique=False)
-    except Exception:
-        pass
+    bind = op.get_bind()
+    if bind.dialect.name == 'mysql':
+        # MySQL: dùng raw SQL để drop index (batch_alter_table không hoạt động trên MySQL)
+        try:
+            op.execute(sa.text("ALTER TABLE ward DROP INDEX uq_ward_province_name"))
+        except Exception:
+            pass  # Index không tồn tại → bỏ qua
+        try:
+            op.execute(sa.text(
+                "ALTER TABLE ward ADD INDEX ix_ward_province_id (province_id)"
+            ))
+        except Exception:
+            pass  # Index đã tồn tại → bỏ qua
+    else:
+        # SQLite và các DB khác: dùng batch mode
+        try:
+            with op.batch_alter_table('ward', schema=None) as batch_op:
+                batch_op.drop_constraint('uq_ward_province_name', type_='unique')
+        except Exception:
+            pass
+        try:
+            with op.batch_alter_table('ward', schema=None) as batch_op:
+                batch_op.create_index('ix_ward_province_id', ['province_id'], unique=False)
+        except Exception:
+            pass
 
 
 def downgrade():
-    try:
-        with op.batch_alter_table('ward', schema=None) as batch_op:
-            batch_op.drop_index('ix_ward_province_id')
-    except Exception:
-        pass
-
-    try:
-        with op.batch_alter_table('ward', schema=None) as batch_op:
-            batch_op.create_unique_constraint('uq_ward_province_name', ['province_id', 'name'])
-    except Exception:
-        pass
+    bind = op.get_bind()
+    if bind.dialect.name == 'mysql':
+        try:
+            op.execute(sa.text("ALTER TABLE ward DROP INDEX ix_ward_province_id"))
+        except Exception:
+            pass
+        try:
+            op.execute(sa.text(
+                "ALTER TABLE ward ADD UNIQUE INDEX uq_ward_province_name (province_id, name)"
+            ))
+        except Exception:
+            pass
+    else:
+        try:
+            with op.batch_alter_table('ward', schema=None) as batch_op:
+                batch_op.drop_index('ix_ward_province_id')
+        except Exception:
+            pass
+        try:
+            with op.batch_alter_table('ward', schema=None) as batch_op:
+                batch_op.create_unique_constraint('uq_ward_province_name', ['province_id', 'name'])
+        except Exception:
+            pass
