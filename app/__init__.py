@@ -34,6 +34,11 @@ def create_app(config_name=None):
         """Endpoint cho UptimeRobot / Docker healthcheck."""
         return jsonify(status="ok")
 
+    @app.route("/favicon.ico")
+    def favicon():
+        """Phục vụ favicon trực tiếp cho trình duyệt truy vấn /favicon.ico."""
+        return app.send_static_file("img/favicon.png")
+
     return app
 
 
