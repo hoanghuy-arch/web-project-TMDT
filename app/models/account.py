@@ -128,7 +128,10 @@ class PasswordResetToken(db.Model):
 class Province(db.Model):
     __tablename__ = "province"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id   = db.Column(db.Integer, primary_key=True)
+    # Mã hành chính quốc gia (ví dụ: "01" = Hà Nội, "79" = TP.HCM).
+    # Dùng làm khóa nhận diện khi đồng bộ dữ liệu, tránh phụ thuộc vào tên có thể thay đổi.
+    code = db.Column(db.String(10), nullable=True, unique=True, index=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
 
     wards = db.relationship("Ward", back_populates="province")            # R04
@@ -138,9 +141,11 @@ class Province(db.Model):
 class Ward(db.Model):
     __tablename__ = "ward"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id          = db.Column(db.Integer, primary_key=True)
+    # Mã hành chính quốc gia (ví dụ: "00004" = Ba Đình – Hà Nội).
+    code        = db.Column(db.String(10), nullable=True, unique=True, index=True)
     province_id = db.Column(db.Integer, db.ForeignKey("province.id"), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    name        = db.Column(db.String(100), nullable=False)
 
     province = db.relationship("Province", back_populates="wards")
 
