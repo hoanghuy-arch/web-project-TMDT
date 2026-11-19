@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Chính sách bảo vệ dữ liệu cá nhân{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{{ url_for('shop.home') }}" class="text-decoration-none">Trang chủ</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Chính sách bảo vệ dữ liệu cá nhân</li>
+    </ol>
+  </nav>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4 p-md-5">
+      <div class="border-bottom pb-3 mb-4">
+        <h1 class="h3 fw-bold text-sz mb-2">CHÍNH SÁCH BẢO VỆ DỮ LIỆU CÁ NHÂN</h1>
+        <p class="text-muted small mb-0">
+          <i class="bi bi-shield-check me-1"></i> Ban hành theo <strong>Luật Bảo vệ dữ liệu cá nhân năm 2025</strong> và <strong>Nghị định 356/2025/NĐ-CP</strong> | Cập nhật lần cuối: Năm 2026
+        </p>
+      </div>
+
+      <div class="policy-content lh-lg">
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">1. Nguyên tắc chung & Cam kết</h2>
+          <p>
+            SportZone (chúng tôi) cam kết tôn trọng quyền riêng tư và bảo vệ tuyệt đối dữ liệu cá nhân của người dùng, khách hàng phù hợp với các quy định pháp luật hiện hành của Việt Nam, đặc biệt là <strong>Luật Bảo vệ dữ liệu cá nhân năm 2025</strong>. 
+          </p>
+          <p>
+            Chính sách này công khai, minh bạch về loại dữ liệu chúng tôi thu thập, mục đích sử dụng, phạm vi chia sẻ, các biện pháp an ninh kỹ thuật và các quyền hợp pháp của bạn đối với dữ liệu của mình.
+          </p>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">2. Dữ liệu cá nhân được thu thập</h2>
+          <p>Chúng tôi chỉ thu thập các dữ liệu cá nhân cơ bản, tối thiểu cần thiết để phục vụ cho giao dịch mua hàng và chăm sóc khách hàng, bao gồm:</p>
+          <ul>
+            <li><strong>Thông tin tài khoản:</strong> Họ và tên, địa chỉ email, mật khẩu (được mã hóa một chiều bằng thuật toán bcrypt).</li>
+            <li><strong>Thông tin giao nhận hàng hóa:</strong> Số điện thoại người nhận, địa chỉ chi tiết nhận hàng (tỉnh/thành phố, phường/xã, tên đường, số nhà).</li>
+            <li><strong>Thông tin lịch sử mua hàng:</strong> Mã đơn hàng, danh mục sản phẩm đặt mua, giá trị thanh toán, trạng thái đơn và yêu cầu đổi/trả.</li>
+            <li><strong>Nhật ký kỹ thuật (Log):</strong> Địa chỉ IP truy cập, thời gian thao tác (được ghi nhận trong nhật ký kiểm toán hệ thống để bảo đảm an ninh mạng).</li>
+          </ul>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">3. Mục đích xử lý dữ liệu</h2>
+          <p>Mọi dữ liệu cá nhân chỉ được xử lý khi có sự đồng ý của khách hàng nhằm các mục đích cụ thể sau:</p>
+          <ol>
+            <li><strong>Xử lý và hoàn tất đơn hàng:</strong> Xác nhận đơn hàng, đóng gói, điều phối giao nhận hàng hóa qua các đơn vị bưu chính.</li>
+            <li><strong>Thông báo thông tin:</strong> Tự động gửi email xác nhận đặt hàng, cập nhật lộ trình giao hàng hoặc gửi liên kết đặt lại mật khẩu bảo mật khi khách hàng có yêu cầu.</li>
+            <li><strong>Chăm sóc khách hàng & Đổi trả:</strong> Tiếp nhận phản ánh, hỗ trợ giải quyết khiếu nại, thực hiện quyền đổi/trả hàng trong vòng 7 ngày.</li>
+            <li><strong>Bảo đảm an toàn hệ thống:</strong> Ngăn chặn hành vi tấn công giả mạo, spam, dò quét mật khẩu hoặc lừa đảo thương mại.</li>
+          </ol>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">4. Chia sẻ dữ liệu với bên thứ ba</h2>
+          <p>
+            SportZone <strong>tuyệt đối không bán, cho thuê, trao đổi hay chuyển giao dữ liệu cá nhân của bạn cho bất kỳ bên thứ ba nào vì mục đích quảng cáo/tiếp thị</strong>. Dữ liệu chỉ được chia sẻ trong phạm vi tối thiểu với:
+          </p>
+          <ul>
+            <li><strong>Đối tác vận chuyển (Giao Hàng Nhanh - GHN):</strong> Chỉ cung cấp họ tên người nhận, số điện thoại và địa chỉ giao hàng để nhân viên bưu tá giao kiện hàng đến tay bạn.</li>
+            <li><strong>Cơ quan nhà nước có thẩm quyền:</strong> Chỉ khi có văn bản yêu cầu chính thức theo đúng trình tự pháp luật quy định.</li>
+          </ul>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">5. Quyền của Chủ thể dữ liệu (Khách hàng)</h2>
+          <p>Theo Luật Bảo vệ dữ liệu cá nhân 2025, bạn có đầy đủ các quyền sau:</p>
+          <ul>
+            <li><strong>Quyền xem và chỉnh sửa:</strong> Bạn có thể chủ động truy cập trang <a href="{{ url_for('account.profile') }}" class="text-sz fw-semibold">Hồ sơ cá nhân</a> và <a href="{{ url_for('account.addresses') }}" class="text-sz fw-semibold">Sổ địa chỉ</a> để cập nhật, chỉnh sửa thông tin bất kỳ lúc nào.</li>
+            <li><strong>Quyền rút lại sự đồng ý / Yêu cầu xóa dữ liệu:</strong> Bạn có quyền gửi yêu cầu ngừng xử lý dữ liệu hoặc xóa vĩnh viễn tài khoản và dữ liệu cá nhân của mình khi không còn nhu cầu mua sắm.</li>
+            <li><strong>Quyền khiếu nại:</strong> Bạn có quyền gửi phản ánh về bất kỳ vi phạm nào liên quan đến bảo mật dữ liệu qua kênh hỗ trợ của chúng tôi.</li>
+          </ul>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">6. Biện pháp an toàn và bảo mật kỹ thuật</h2>
+          <p>Hệ thống SportZone áp dụng các biện pháp an ninh kỹ thuật đạt chuẩn quốc tế:</p>
+          <ul>
+            <li>Toàn bộ đường truyền kết nối được mã hóa bằng giao thức <strong>HTTPS / TLS 1.2 và TLS 1.3</strong> với chứng chỉ số Let's Encrypt.</li>
+            <li>Mật khẩu người dùng được băm mã hóa một chiều bằng thuật toán <strong>bcrypt</strong> với muối ngẫu nhiên (salt), nhân viên hay quản trị viên đều không thể xem mật khẩu thô.</li>
+            <li>Cơ sở dữ liệu được cô lập hoàn toàn trong mạng nội bộ Docker, không mở cổng công khai ra ngoài Internet.</li>
+            <li>Trang bị cơ chế chống tấn công CSRF, Rate Limiting chống dò mật khẩu và nhật ký kiểm toán Append-only Audit Log.</li>
+          </ul>
+        </section>
+
+        <section class="mb-0">
+          <h2 class="h5 fw-bold text-dark">7. Đầu mối liên hệ về Bảo vệ dữ liệu</h2>
+          <p>Nếu bạn có bất kỳ câu hỏi hoặc muốn thực hiện các quyền đối với dữ liệu cá nhân của mình, vui lòng liên hệ:</p>
+          <div class="bg-light p-3 rounded border">
+            <p class="mb-1"><strong>Bộ phận Hỗ trợ khách hàng & Bảo vệ dữ liệu SportZone</strong></p>
+            <p class="mb-1"><i class="bi bi-geo-alt me-2 text-sz"></i> Địa chỉ: TP. Hồ Chí Minh, Việt Nam</p>
+            <p class="mb-1"><i class="bi bi-envelope me-2 text-sz"></i> Email tiếp nhận: <a href="mailto:support@sportzone.id.vn" class="text-decoration-none">support@sportzone.id.vn</a></p>
+            <p class="mb-0"><i class="bi bi-telephone me-2 text-sz"></i> Hotline hỗ trợ: 1900 8888 (08:00 - 21:00 hàng ngày)</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

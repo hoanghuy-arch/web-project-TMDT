@@ -89,3 +89,29 @@ def product_detail(slug):
         reviews=catalog.review_summary(product),
         related=catalog.related_products(product),
     )
+
+
+# ------------------------------------------------------------------ Chính sách & Pháp lý
+@bp.route("/privacy-policy")
+def privacy_policy():
+    """Chính sách bảo vệ dữ liệu cá nhân theo Luật BV dữ liệu cá nhân 2025."""
+    return render_template("shop/policies/privacy.html")
+
+
+@bp.route("/terms")
+def terms_of_service():
+    """Điều khoản mua bán & giao kết dịch vụ theo Luật TMĐT 122/2025/QH15."""
+    return render_template("shop/policies/terms.html")
+
+
+@bp.route("/returns-policy")
+def returns_policy():
+    """Chính sách đổi trả & hoàn tiền (7 ngày)."""
+    return render_template("shop/policies/returns.html")
+
+
+@bp.route("/shipping-policy")
+def shipping_policy():
+    """Chính sách giao nhận & vận chuyển (tích hợp GHN)."""
+    return render_template("shop/policies/shipping.html")
+

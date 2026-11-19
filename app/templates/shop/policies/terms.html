@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Điều khoản dịch vụ & Mua bán hàng hóa{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{{ url_for('shop.home') }}" class="text-decoration-none">Trang chủ</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Điều khoản dịch vụ</li>
+    </ol>
+  </nav>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4 p-md-5">
+      <div class="border-bottom pb-3 mb-4">
+        <h1 class="h3 fw-bold text-sz mb-2">ĐIỀU KHOẢN MUA BÁN & SỬ DỤNG DỊCH VỤ</h1>
+        <p class="text-muted small mb-0">
+          <i class="bi bi-file-earmark-text me-1"></i> Xây dựng theo <strong>Luật Thương mại điện tử số 122/2025/QH15</strong> và <strong>Luật Bảo vệ quyền lợi người tiêu dùng 2023</strong>
+        </p>
+      </div>
+
+      <div class="policy-content lh-lg">
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">1. Thông tin chủ sở hữu website</h2>
+          <div class="bg-light p-3 rounded border mb-3">
+            <p class="mb-1"><strong>CỬA HÀNG THƯƠNG MẠI ĐIỆN TỬ THỂ THAO SPORTZONE</strong></p>
+            <p class="mb-1"><strong>Mô hình hoạt động:</strong> Website thương mại điện tử bán hàng trực tuyến (B2C)</p>
+            <p class="mb-1"><strong>Tên miền hoạt động chính thức:</strong> <a href="https://sportzone.id.vn" class="text-sz fw-semibold">https://sportzone.id.vn</a></p>
+            <p class="mb-1"><strong>Địa chỉ giao dịch:</strong> TP. Hồ Chí Minh, Việt Nam</p>
+            <p class="mb-0"><strong>Email liên hệ:</strong> contact@sportzone.id.vn | <strong>Hotline:</strong> 1900 8888</p>
+          </div>
+          <p>
+            Bằng việc truy cập, đăng ký tài khoản hoặc tạo đơn mua hàng trên website SportZone, người dùng xác nhận đã đọc, hiểu và đồng ý tuân thủ toàn bộ các điều khoản được nêu dưới đây.
+          </p>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">2. Quy trình giao kết hợp đồng trực tuyến</h2>
+          <p>Hợp đồng mua bán hàng hóa điện tử giữa SportZone và khách hàng được hình thành qua các bước minh bạch:</p>
+          <ol>
+            <li><strong>Lựa chọn sản phẩm:</strong> Khách hàng lựa chọn mẫu mã, màu sắc, kích thước (size) và số lượng mong muốn trên website.</li>
+            <li><strong>Xác nhận thông tin giỏ hàng:</strong> Khách hàng kiểm tra lại chi tiết giỏ hàng, thông tin giao hàng và chọn phương thức thanh toán.</li>
+            <li><strong>Gửi đơn đặt hàng:</strong> Khi khách hàng nhấn nút <em>"Đặt hàng"</em>, đơn hàng được gửi vào hệ thống và được cấp một <strong>Mã đơn hàng</strong> duy nhất.</li>
+            <li><strong>Xác nhận hợp đồng:</strong> Hệ thống tự động gửi email thông báo xác nhận đơn hàng thành công kèm chi tiết mặt hàng đến địa chỉ email mà khách hàng đã cung cấp.</li>
+          </ol>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">3. Giá cả, Thuế và Chi phí vận chuyển</h2>
+          <ul>
+            <li><strong>Giá bán niêm yết:</strong> Toàn bộ giá sản phẩm hiển thị trên website SportZone được tính bằng đồng Việt Nam (VNĐ) và <strong>đã bao gồm thuế giá trị gia tăng (GTGT)</strong> theo quy định hiện hành.</li>
+            <li><strong>Chi phí vận chuyển:</strong> Phí giao hàng được tính toán tự động dựa trên vị trí địa lý của khách hàng và bảng cước của đối tác vận chuyển. Chi phí này được hiển thị rõ ràng cho khách hàng kiểm tra trước khi xác nhận đặt hàng.</li>
+            <li><strong>Chính sách Freeship:</strong> Miễn phí vận chuyển toàn quốc cho các đơn hàng có tổng giá trị thanh toán từ <strong>500.000 VNĐ</strong> trở lên.</li>
+          </ul>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">4. Phương thức thanh toán & Thời hạn giữ hàng</h2>
+          <ul>
+            <li><strong>Thanh toán khi nhận hàng (COD):</strong> Khách hàng thanh toán tiền mặt trực tiếp cho nhân viên giao hàng sau khi nhận và kiểm tra kiện hàng.</li>
+            <li><strong>Thời hạn giữ đơn hàng (Timeout):</strong> Đối với các phương thức thanh toán trực tuyến hoặc chờ xác nhận, đơn hàng được giữ tạm thời trong vòng <strong>15 phút</strong>. Quá thời hạn trên nếu không hoàn tất thanh toán, hệ thống sẽ tự động hủy đơn và giải phóng tồn kho về lại cửa hàng.</li>
+          </ul>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">5. Quyền và Nghĩa vụ của Khách hàng</h2>
+          <ul>
+            <li>Cung cấp đầy đủ, chính xác thông tin liên hệ và địa chỉ nhận hàng.</li>
+            <li>Được kiểm tra tình trạng đóng gói của kiện hàng trước khi nhận.</li>
+            <li>Được hưởng quyền yêu cầu đổi/trả hàng trong vòng <strong>07 ngày</strong> theo đúng quy định tại Chính sách đổi trả của SportZone.</li>
+            <li>Bảo mật thông tin tài khoản đăng nhập và thông báo kịp thời cho SportZone nếu phát hiện tài khoản bị truy cập trái phép.</li>
+          </ul>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">6. Quyền và Nghĩa vụ của SportZone</h2>
+          <ul>
+            <li>Cung cấp sản phẩm chính hãng, đảm bảo đúng nguồn gốc xuất xứ và tiêu chuẩn chất lượng mô tả trên website.</li>
+            <li>Đóng gói cẩn thận và bàn giao đúng hẹn cho đơn vị vận chuyển.</li>
+            <li>Bảo mật thông tin cá nhân của người mua theo đúng quy định của Luật Bảo vệ dữ liệu cá nhân.</li>
+            <li>Có quyền từ chối hoặc hủy đơn hàng trong trường hợp nghi ngờ đơn hàng ảo, thông tin người nhận không chính xác hoặc có dấu hiệu gian lận thương mại.</li>
+          </ul>
+        </section>
+
+        <section class="mb-0">
+          <h2 class="h5 fw-bold text-dark">7. Cơ chế giải quyết khiếu nại & Tranh chấp</h2>
+          <p>
+            Mọi khiếu nại, phản ánh phát sinh trong quá trình giao dịch đều được ưu tiên giải quyết trên tinh thần thương lượng, hòa giải nhằm đảm bảo tối đa quyền lợi chính đáng của người tiêu dùng.
+          </p>
+          <p class="mb-0">
+            Khách hàng có thể gửi khiếu nại qua email: <a href="mailto:support@sportzone.id.vn" class="text-decoration-none fw-semibold text-sz">support@sportzone.id.vn</a> hoặc Hotline <strong>1900 8888</strong>. Chúng tôi cam kết phản hồi phương án xử lý trong vòng <strong>48 giờ làm việc</strong>.
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

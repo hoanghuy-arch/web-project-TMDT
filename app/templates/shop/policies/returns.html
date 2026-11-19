@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Chính sách đổi trả & hoàn tiền{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{{ url_for('shop.home') }}" class="text-decoration-none">Trang chủ</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Chính sách đổi trả & hoàn tiền</li>
+    </ol>
+  </nav>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4 p-md-5">
+      <div class="border-bottom pb-3 mb-4">
+        <h1 class="h3 fw-bold text-sz mb-2">CHÍNH SÁCH ĐỔI TRẢ & HOÀN TIỀN</h1>
+        <p class="text-muted small mb-0">
+          <i class="bi bi-arrow-repeat me-1"></i> Áp dụng cho toàn bộ đơn hàng mua sắm tại hệ thống SportZone | Thời hạn bảo đảm: <strong>07 ngày</strong>
+        </p>
+      </div>
+
+      <div class="policy-content lh-lg">
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">1. Thời hạn đổi trả hàng</h2>
+          <p>
+            SportZone hỗ trợ khách hàng thực hiện quyền đổi hoặc trả hàng trong vòng <strong>07 ngày</strong> kể từ thời điểm khách hàng nhận hàng thành công (trạng thái đơn hàng chuyển sang <em>Đã giao hàng / DELIVERED</em>).
+          </p>
+          <div class="alert alert-info py-2 small">
+            <i class="bi bi-info-circle me-1"></i> Quá thời hạn 07 ngày kể từ ngày nhận hàng, hệ thống sẽ tự động đóng chức năng tạo yêu cầu đổi/trả trực tuyến.
+          </div>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">2. Điều kiện chấp nhận đổi trả</h2>
+          <p>Sản phẩm được chấp nhận đổi/trả khi đáp ứng các điều kiện sau:</p>
+          <ul>
+            <li><strong>Lỗi từ phía nhà sản xuất hoặc shop:</strong> Sản phẩm bị rách, sứt chỉ, hỏng khóa kéo, phai màu bất thường, giao sai kích thước (size) hoặc sai mẫu mã so với đơn đặt hàng.</li>
+            <li><strong>Tình trạng sản phẩm:</strong> Sản phẩm còn nguyên tem, mác nhà sản xuất, nguyên bao bì đóng gói, chưa qua giặt tẩy và không có mùi lạ (nước hoa, cơ thể, chất tẩy).</li>
+            <li><strong>Đầy đủ chứng từ:</strong> Có mã đơn hàng hợp lệ đã mua trên hệ thống SportZone.</li>
+          </ul>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">3. Quy trình thực hiện đổi trả trực tiếp trên website</h2>
+          <p>Hệ thống SportZone đã tự động hóa quy trình đổi trả trực tuyến, quý khách không cần phải mang hàng ra bưu cục:</p>
+          <div class="row g-3 my-2">
+            <div class="col-md-3">
+              <div class="card h-100 bg-light border-0 p-3 text-center">
+                <div class="fs-3 text-sz mb-2"><i class="bi bi-card-checklist"></i></div>
+                <h6 class="fw-bold">Bước 1: Chọn đơn hàng</h6>
+                <p class="small text-muted mb-0">Đăng nhập tài khoản, vào <a href="{{ url_for('account.orders') }}" class="text-sz">Lịch sử đơn hàng</a> và mở chi tiết đơn muốn đổi trả.</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card h-100 bg-light border-0 p-3 text-center">
+                <div class="fs-3 text-sz mb-2"><i class="bi bi-pencil-square"></i></div>
+                <h6 class="fw-bold">Bước 2: Tạo yêu cầu</h6>
+                <p class="small text-muted mb-0">Nhấn nút <strong>"Yêu cầu đổi/trả"</strong>, chọn mặt hàng, số lượng, lý do và đính kèm hình ảnh thực tế.</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card h-100 bg-light border-0 p-3 text-center">
+                <div class="fs-3 text-sz mb-2"><i class="bi bi-truck"></i></div>
+                <h6 class="fw-bold">Bước 3: Thu hồi hàng</h6>
+                <p class="small text-muted mb-0">Nhân viên duyệt yêu cầu, bưu tá đối tác vận chuyển sẽ đến tận nhà nhận lại kiện hàng đổi trả.</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card h-100 bg-light border-0 p-3 text-center">
+                <div class="fs-3 text-sz mb-2"><i class="bi bi-cash-stack"></i></div>
+                <h6 class="fw-bold">Bước 4: Hoàn tiền / Đổi mới</h6>
+                <p class="small text-muted mb-0">Shop kiểm tra hàng tại kho và tiến hành chuyển khoản hoàn tiền hoặc gửi sản phẩm đổi mới.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">4. Chính sách hoàn tiền</h2>
+          <ul>
+            <li><strong>Phương thức hoàn tiền:</strong> Hoàn tiền trực tiếp qua chuyển khoản ngân hàng tới số tài khoản do khách hàng cung cấp.</li>
+            <li><strong>Thời hạn xử lý:</strong> Trong vòng <strong>03 đến 05 ngày làm việc</strong> kể từ khi kho hàng SportZone nhận được kiện hàng hoàn trả và nghiệm thu đạt tiêu chuẩn.</li>
+            <li><strong>Chi phí vận chuyển đổi trả:</strong>
+              <ul>
+                <li>Nếu lỗi do SportZone (giao sai hàng, hàng lỗi): <strong>Miễn phí 100%</strong> chi phí thu hồi và gửi bù hàng.</li>
+                <li>Nếu khách đổi vì muốn đổi size/màu do nhu cầu cá nhân: Khách hàng thanh toán phí ship hoàn theo biểu phí đơn vị bưu chính.</li>
+              </ul>
+            </li>
+          </ul>
+        </section>
+
+        <section class="mb-0">
+          <h2 class="h5 fw-bold text-dark">5. Các trường hợp từ chối đổi trả</h2>
+          <ul>
+            <li>Sản phẩm đã bị tháo tem, cắt mác, đã qua sử dụng, có vết bẩn hoặc đã qua giặt ủi.</li>
+            <li>Sản phẩm bị rách, hỏng do lỗi từ người sử dụng (va quẹt sắc nhọn, sử dụng chất tẩy mạnh sai hướng dẫn).</li>
+            <li>Yêu cầu đổi trả gửi sau thời hạn 07 ngày kể từ khi nhận hàng.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

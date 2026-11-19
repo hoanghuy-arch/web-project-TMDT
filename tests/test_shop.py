@@ -254,3 +254,23 @@ def test_related_products_same_category(client, shop):
     mk("Khác loại", 100000, shop["quan"], [(shop["m"], shop["den"], 5, 0)])
     related = client.get("/products/chinh").get_data(as_text=True).split("Sản phẩm liên quan")[1]
     assert "Cùng loại" in related and "Khác loại" not in related and ">Chính<" not in related
+
+
+def test_policy_pages_render_successfully(client):
+    """Kiểm tra 4 trang chính sách pháp lý theo Luật TMĐT 122/2025 và Luật BV DLCN 2025."""
+    r_privacy = client.get("/privacy-policy")
+    assert r_privacy.status_code == 200
+    assert "CHÍNH SÁCH BẢO VỆ DỮ LIỆU CÁ NHÂN" in r_privacy.get_data(as_text=True)
+
+    r_terms = client.get("/terms")
+    assert r_terms.status_code == 200
+    assert "ĐIỀU KHOẢN MUA BÁN & SỬ DỤNG DỊCH VỤ" in r_terms.get_data(as_text=True)
+
+    r_returns = client.get("/returns-policy")
+    assert r_returns.status_code == 200
+    assert "CHÍNH SÁCH ĐỔI TRẢ & HOÀN TIỀN" in r_returns.get_data(as_text=True)
+
+    r_shipping = client.get("/shipping-policy")
+    assert r_shipping.status_code == 200
+    assert "CHÍNH SÁCH VẬN CHUYỂN & GIAO NHẬN" in r_shipping.get_data(as_text=True)
+

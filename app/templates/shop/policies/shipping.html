@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Chính sách vận chuyển & Giao nhận{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{{ url_for('shop.home') }}" class="text-decoration-none">Trang chủ</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Chính sách vận chuyển</li>
+    </ol>
+  </nav>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4 p-md-5">
+      <div class="border-bottom pb-3 mb-4">
+        <h1 class="h3 fw-bold text-sz mb-2">CHÍNH SÁCH VẬN CHUYỂN & GIAO NHẬN</h1>
+        <p class="text-muted small mb-0">
+          <i class="bi bi-truck me-1"></i> Liên kết trực tiếp dịch vụ bưu chính <strong>Giao Hàng Nhanh (GHN)</strong> | Giao hàng toàn quốc
+        </p>
+      </div>
+
+      <div class="policy-content lh-lg">
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">1. Phạm vi giao hàng</h2>
+          <p>
+            SportZone cung cấp dịch vụ giao hàng tận nơi trên toàn quốc, bao phủ toàn bộ <strong>34 tỉnh/thành phố và 3.321 phường/xã</strong> theo hệ thống dữ liệu hành chính chuẩn quốc gia đã được tích hợp trong hệ thống đặt hàng.
+          </p>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">2. Thời gian giao hàng dự kiến</h2>
+          <p>Đơn hàng sẽ được nhân viên kho đóng gói và bàn giao cho đơn vị vận chuyển trong vòng 24 giờ sau khi quý khách đặt hàng. Thời gian giao hàng dự kiến tính từ lúc xuất kho:</p>
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped small">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col">Khu vực nhận hàng</th>
+                  <th scope="col">Thời gian giao dự kiến</th>
+                  <th scope="col">Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="fw-semibold">Khu vực Nội thành TP. Hồ Chí Minh</td>
+                  <td>1 – 2 ngày làm việc</td>
+                  <td>Giao nhanh trong ngày hoặc ngày hôm sau</td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold">Các tỉnh thành miền Nam & Miền Trung</td>
+                  <td>2 – 3 ngày làm việc</td>
+                  <td>Vận chuyển đường bay / đường bộ tiêu chuẩn</td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold">Các tỉnh thành phía Bắc</td>
+                  <td>3 – 4 ngày làm việc</td>
+                  <td>Vận chuyển đường bưu chính nhanh</td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold">Khu vực vùng sâu, hải đảo</td>
+                  <td>4 – 6 ngày làm việc</td>
+                  <td>Tùy thuộc vào điều kiện thời tiết và giao thông bưu cục</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-muted small mb-0"><em>* Thời gian trên không tính các ngày Chủ nhật và ngày Lễ, Tết theo quy định của Nhà nước.</em></p>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">3. Cước phí vận chuyển & Ưu đãi Freeship</h2>
+          <ul>
+            <li><strong>Cước phí minh bạch:</strong> Chi phí giao hàng được hệ thống tính toán tự động thông qua kết nối API với đơn vị vận chuyển GHN dựa trên địa chỉ nhận hàng và khối lượng gói hàng. Phí vận chuyển hiển thị rõ ràng tại bước Thanh toán (Checkout) trước khi khách hàng ấn Đặt hàng.</li>
+            <li><strong>Chính sách Miễn phí vận chuyển (Freeship):</strong> SportZone áp dụng <strong>Miễn phí vận chuyển 100%</strong> cho mọi đơn hàng có giá trị thanh toán từ <strong>500.000 VNĐ</strong> trở lên trên toàn quốc.</li>
+          </ul>
+        </section>
+
+        <section class="mb-4">
+          <h2 class="h5 fw-bold text-dark">4. Quy định đồng kiểm khi nhận hàng</h2>
+          <p>
+            Để bảo vệ tối đa quyền lợi của khách hàng khi mua sắm trực tuyến, SportZone áp dụng chính sách <strong>Đồng kiểm ngoại quan</strong>:
+          </p>
+          <ul>
+            <li>Khách hàng được quyền kiểm tra tình trạng bên ngoài của kiện hàng (hộp còn nguyên vẹn, không móp méo, rách nát, ướt hoặc có dấu hiệu bị bóc mở trước) trước khi ký nhận và thanh toán tiền mặt (COD).</li>
+            <li>Nếu phát hiện kiện hàng có dấu hiệu hư hỏng, ướt hoặc không đúng mã vận đơn, khách hàng có quyền từ chối nhận hàng và thông báo ngay cho Hotline CSKH SportZone.</li>
+          </ul>
+        </section>
+
+        <section class="mb-0">
+          <h2 class="h5 fw-bold text-dark">5. Trách nhiệm xử lý sự cố vận chuyển</h2>
+          <p>
+            Trường hợp kiện hàng bị thất lạc, hư hỏng hoặc giao trễ quá thời gian cam kết do lỗi từ đơn vị vận chuyển, SportZone cam kết chịu hoàn toàn trách nhiệm và chủ động gửi bù sản phẩm mới cho quý khách hoặc tiến hành hoàn tiền 100% trong thời gian sớm nhất.
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
