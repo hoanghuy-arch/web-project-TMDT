@@ -184,12 +184,6 @@ def run(dry_run: bool = False, force: bool = False):
 
     ward_new = ward_upd = ward_skip = ward_no_parent = 0
     wards_to_add: list[Ward] = []
-    # Tránh chèn trùng (province_id, name) trong cùng batch
-    seen_keys: set[tuple] = set(cache_ward_by_key.keys())
-    seen_keys.update(
-        (w.province_id, w.name)
-        for w in db.session.query(Ward).filter(Ward.code.isnot(None)).all()
-    )
 
     for item in wards_raw:
         code   = _get_code(item)
@@ -209,32 +203,24 @@ def run(dry_run: bool = False, force: bool = False):
         if code in cache_ward_by_code:
             # Đã có theo code → cập nhật tên nếu khác
             w = cache_ward_by_code[code]
-            if w.name != name:
+            if w and w.name != name:
                 if not dry_run:
-                    # Kiểm tra UniqueConstraint trước khi đổi tên
-                    if (province_id, name) not in seen_keys:
-                        old_key = (w.province_id, w.name)
-                        seen_keys.discard(old_key)
-                        w.name = name
-                        seen_keys.add((province_id, name))
+                    w.name = name
                 ward_upd += 1
             else:
                 ward_skip += 1
-        elif (province_id, name) in seen_keys:
+        elif (province_id, name) in cache_ward_by_key:
             # Trùng (province_id, name) nhưng chưa có code → gán code
-            if (province_id, name) in cache_ward_by_key:
-                w = cache_ward_by_key[(province_id, name)]
-                if not dry_run:
-                    w.code = code
-                    cache_ward_by_code[code] = w
-                ward_upd += 1
-            else:
-                ward_skip += 1
+            w = cache_ward_by_key.pop((province_id, name))
+            if not dry_run:
+                w.code = code
+                cache_ward_by_code[code] = w
+            ward_upd += 1
         else:
             # Mới hoàn toàn → thêm mới
             if not dry_run:
                 wards_to_add.append(Ward(code=code, province_id=province_id, name=name))
-                seen_keys.add((province_id, name))
+                cache_ward_by_code[code] = None
             ward_new += 1
 
     if not dry_run and wards_to_add:

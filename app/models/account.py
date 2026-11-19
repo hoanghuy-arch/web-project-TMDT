@@ -143,15 +143,15 @@ class Ward(db.Model):
 
     id          = db.Column(db.Integer, primary_key=True)
     # Mã hành chính quốc gia (ví dụ: "00004" = Ba Đình – Hà Nội).
+    # Đây là khóa nhận diện duy nhất khi đồng bộ dữ liệu.
     code        = db.Column(db.String(10), nullable=True, unique=True, index=True)
-    province_id = db.Column(db.Integer, db.ForeignKey("province.id"), nullable=False)
+    province_id = db.Column(db.Integer, db.ForeignKey("province.id"), nullable=False, index=True)
     name        = db.Column(db.String(100), nullable=False)
 
     province = db.relationship("Province", back_populates="wards")
-
-    __table_args__ = (
-        db.UniqueConstraint("province_id", "name", name="uq_ward_province_name"),
-    )
+    # Lưu ý: Không dùng UniqueConstraint("province_id", "name") vì trong cùng tỉnh
+    # có các xã/phường khác nhau có tên dấu khác biệt (như Văn Lang vs Văn Lăng,
+    # Tân Thành vs Tân Thạnh) sẽ bị xung đột trên MySQL collation accent-insensitive.
 
 
 class Address(db.Model):
