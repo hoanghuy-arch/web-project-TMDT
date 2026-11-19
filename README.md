@@ -462,11 +462,7 @@ Khôi phục nguyên trạng CSDL từ bản sao lưu gần nhất khi gặp s�
 ---
 
 ## Tác giả
-
-* **Nhóm tác giả Đồ án Thương mại điện tử SportZone**
-  * Thiết kế kiến trúc hệ thống, phát triển phân hệ Backend & API tích hợp 3PL.
-  * Xây dựng giao diện Responsive, bộ lọc động và 4 trang chính sách pháp lý.
-  * Triển khai hạ tầng VPS, Docker Compose, Nginx SSL, kịch bản sao lưu và kiểm thử hiệu năng.
+hoanghuy216412@gmail.com
 
 ---
 
