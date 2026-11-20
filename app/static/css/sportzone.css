@@ -78,13 +78,15 @@ a { text-decoration: none; }
 .sz-section { padding: 3rem 0 1rem; }
 .sz-section__title { font-weight: 700; font-size: 1.5rem; letter-spacing: -.01em; margin-bottom: 1.25rem; }
 
-.sz-cat { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: 1rem; overflow: hidden;
-  background: linear-gradient(160deg, var(--sz-navy), var(--sz-navy-deep)); color: #fff; }
-.sz-cat img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .35s; }
-.sz-cat::after { content: ""; position: absolute; inset: 0;
-  background: linear-gradient(to top, rgb(7 25 79 / .8), transparent 55%); }
-.sz-cat__name { position: absolute; left: 1rem; bottom: .9rem; z-index: 1; font-weight: 700; font-size: 1.1rem; }
-.sz-cat:hover img { transform: scale(1.05); }
+/* Thẻ danh mục: chỉ ảnh, cả thẻ là link */
+.sz-cat { position: relative; display: flex; align-items: center; justify-content: center;
+  aspect-ratio: 1 / 1; border-radius: 1rem; overflow: hidden; background: var(--sz-mist);
+  border: 2px solid transparent; transition: border-color .15s, box-shadow .15s; }
+.sz-cat img { width: 100%; height: 100%; object-fit: contain; padding: 1.25rem;
+  mix-blend-mode: multiply; /* nền trắng của ảnh sản phẩm hòa vào nền thẻ */ transition: transform .3s; }
+.sz-cat:hover, .sz-cat:focus-visible { border-color: var(--sz-orange); box-shadow: 0 8px 24px rgb(7 25 79 / .12); }
+.sz-cat:hover img { transform: scale(1.06); }
+/* Chưa có ảnh: vẫn thấy khối nhạt, không vỡ layout */
 
 /* ---------- Thẻ sản phẩm (dùng class này cho card hiện có) ---------- */
 .sz-card { border: 1px solid #e6e9f2; border-radius: .75rem; overflow: hidden; background: #fff; height: 100%; }
@@ -123,4 +125,5 @@ a { text-decoration: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .sz-cat img, .sz-nav .nav-link::after { transition: none; }
+  .sz-cat:hover img { transform: none; }
 }

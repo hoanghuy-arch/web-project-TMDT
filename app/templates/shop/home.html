@@ -29,16 +29,17 @@
 {% endblock %}
 
 {% block content %}
-{# ===== Danh mục: thẻ ảnh. Ảnh: static/img/cat/<slug>.jpg ===== #}
+{# ===== Danh mục: chỉ có ảnh, bấm vào ảnh là sang trang danh mục =====
+   Ảnh lấy theo thứ tự: c.cover_image (ảnh sản phẩm, đường dẫn trong static/) rồi tới static/img/cat/<slug>.jpg #}
 {% if categories %}
 <section class="mb-5">
   <h2 class="h4 fw-bold mb-3">Mua theo danh mục</h2>
   <div class="row row-cols-2 row-cols-lg-4 g-3">
     {% for c in categories %}
+    {% set cat_img = url_for('static', filename=c.cover_image) if c.cover_image else url_for('static', filename='img/cat/' ~ c.slug ~ '.jpg') %}
     <div class="col">
-      <a href="{{ url_for('shop.product_list', category=c.slug) }}" class="sz-cat">
-        <img src="{{ url_for('static', filename='img/cat/' ~ c.slug ~ '.jpg') }}" alt="" loading="lazy" onerror="this.remove()">
-        <span class="sz-cat__name">{{ c.name }}</span>
+      <a href="{{ url_for('shop.product_list', category=c.slug) }}" class="sz-cat" title="{{ c.name }}" aria-label="{{ c.name }}">
+        <img src="{{ cat_img }}" alt="{{ c.name }}" loading="lazy" onerror="this.remove()">
       </a>
     </div>
     {% endfor %}

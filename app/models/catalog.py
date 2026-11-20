@@ -18,6 +18,33 @@ class Category(db.Model):
     children = db.relationship("Category", back_populates="parent")
     products = db.relationship("Product", back_populates="category")                        # R08
 
+    @property
+    def cover_image(self):
+        """Đường dẫn ảnh sản phẩm (trong static/) làm ảnh đại diện cho danh mục.
+        Ưu tiên sản phẩm còn kinh doanh của chính danh mục này, sau đó đến các danh mục con.
+        """
+        def _find_img(cat):
+            for p in cat.products:
+                if p.is_active and p.primary_image:
+                    raw_url = p.primary_image.url
+                    if raw_url and not raw_url.startswith(("http://", "https://")):
+                        return raw_url.removeprefix("/static/").removeprefix("static/").lstrip("/")
+            return None
+
+        img = _find_img(self)
+        if img:
+            return img
+
+        queue = list(self.children)
+        while queue:
+            child = queue.pop(0)
+            if child.is_active:
+                img = _find_img(child)
+                if img:
+                    return img
+                queue.extend(child.children)
+        return None
+
 
 class Size(db.Model):
     __tablename__ = "size"
