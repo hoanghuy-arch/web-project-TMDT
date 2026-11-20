@@ -2,30 +2,43 @@
 {% from "shop/_cards.html" import product_card %}
 {% block title %}Trang chủ{% endblock %}
 {% block head %}<meta name="description" content="SportZone - trang phục thể thao thương hiệu riêng cho tập luyện, chạy bộ và mặc hằng ngày.">{% endblock %}
-{% block content %}
-<section class="sz-hero rounded-4 p-4 p-md-5 text-white mb-4">
-  <div class="col-lg-7">
-    <h1 class="display-5 fw-bold">Mặc đẹp. Tập hết mình.</h1>
-    <p class="lead">Trang phục thể thao thương hiệu riêng SportZone cho tập luyện, chạy bộ và mặc hằng ngày.</p>
-    <a href="{{ url_for('shop.product_list') }}" class="btn btn-sz btn-lg">Mua sắm ngay</a>
+
+{# ===== Hero tràn chiều ngang (nằm ngoài <main> của base.html) ===== #}
+{% block hero %}
+<section class="sz-hero">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6 order-2 order-lg-1">
+        <h1 class="sz-hero__title">Mặc đẹp.<br>Tập hết mình.</h1>
+        <p class="sz-hero__lead">Trang phục thể thao thương hiệu riêng SportZone cho tập luyện, chạy bộ và mặc hằng ngày.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{{ url_for('shop.product_list') }}" class="btn sz-btn-accent btn-lg">Mua sắm ngay</a>
+          <a href="{{ url_for('shop.product_list', sort='bestselling') }}" class="btn sz-btn-ghost btn-lg">Xem bán chạy</a>
+        </div>
+      </div>
+      <div class="col-lg-6 order-1 order-lg-2">
+        <div class="sz-hero__media">
+          {# Đặt ảnh tại static/img/hero.jpg (khoảng 1200x960). Chưa có ảnh thì khung để trống màu nhạt. #}
+          <img src="{{ url_for('static', filename='img/hero.jpg') }}" alt="Người chạy bộ mặc trang phục SportZone"
+               onerror="this.remove()">
+        </div>
+      </div>
+    </div>
   </div>
 </section>
+{% endblock %}
 
-<section class="row row-cols-1 row-cols-md-3 g-3 mb-5 text-center">
-  <div class="col"><div class="sz-benefit p-3 rounded-3 h-100"><i class="bi bi-truck fs-3 text-sz"></i><div class="fw-semibold">Giao hàng toàn quốc</div><div class="small text-muted">Theo dõi trạng thái đơn trực tuyến</div></div></div>
-  <div class="col"><div class="sz-benefit p-3 rounded-3 h-100"><i class="bi bi-arrow-repeat fs-3 text-sz"></i><div class="fw-semibold">Đổi trả trong {{ return_days }} ngày</div><div class="small text-muted">Kể từ khi nhận hàng thành công</div></div></div>
-  <div class="col"><div class="sz-benefit p-3 rounded-3 h-100"><i class="bi bi-shield-check fs-3 text-sz"></i><div class="fw-semibold">Thanh toán linh hoạt</div><div class="small text-muted">COD hoặc thanh toán trực tuyến</div></div></div>
-</section>
-
+{% block content %}
+{# ===== Danh mục: thẻ ảnh. Ảnh: static/img/cat/<slug>.jpg ===== #}
 {% if categories %}
 <section class="mb-5">
-  <h2 class="h4 mb-3">Danh mục</h2>
-  <div class="row row-cols-2 row-cols-md-4 g-3">
+  <h2 class="h4 fw-bold mb-3">Mua theo danh mục</h2>
+  <div class="row row-cols-2 row-cols-lg-4 g-3">
     {% for c in categories %}
     <div class="col">
-      <a href="{{ url_for('shop.product_list', category=c.slug) }}" class="sz-cat d-block text-decoration-none text-center rounded-3 p-4 h-100">
-        <i class="bi bi-tags fs-3 text-sz"></i>
-        <div class="fw-semibold text-dark mt-1">{{ c.name }}</div>
+      <a href="{{ url_for('shop.product_list', category=c.slug) }}" class="sz-cat">
+        <img src="{{ url_for('static', filename='img/cat/' ~ c.slug ~ '.jpg') }}" alt="" loading="lazy" onerror="this.remove()">
+        <span class="sz-cat__name">{{ c.name }}</span>
       </a>
     </div>
     {% endfor %}
@@ -33,11 +46,16 @@
 </section>
 {% endif %}
 
+{# Tránh lặp: bỏ khỏi "Sản phẩm mới" những sản phẩm đã có ở "Bán chạy" #}
+{% set best_ids = (best_sellers or [])|map(attribute='id')|list %}
+{% set fresh = (new_products or [])|rejectattr('id', 'in', best_ids)|list %}
+{% if not fresh %}{% set fresh = new_products or [] %}{% endif %}
+
 {% if best_sellers %}
 <section class="mb-5">
   <div class="d-flex justify-content-between align-items-end mb-3">
-    <h2 class="h4 mb-0">Bán chạy</h2>
-    <a href="{{ url_for('shop.product_list', sort='bestselling') }}" class="small">Xem tất cả</a>
+    <h2 class="h4 fw-bold mb-0">Bán chạy</h2>
+    <a href="{{ url_for('shop.product_list', sort='bestselling') }}" class="small fw-semibold">Xem tất cả</a>
   </div>
   <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
     {% for p in best_sellers %}{{ product_card(p) }}{% endfor %}
@@ -47,12 +65,12 @@
 
 <section class="mb-4">
   <div class="d-flex justify-content-between align-items-end mb-3">
-    <h2 class="h4 mb-0">Sản phẩm mới</h2>
-    <a href="{{ url_for('shop.product_list') }}" class="small">Xem tất cả</a>
+    <h2 class="h4 fw-bold mb-0">Sản phẩm mới</h2>
+    <a href="{{ url_for('shop.product_list') }}" class="small fw-semibold">Xem tất cả</a>
   </div>
-  {% if new_products %}
+  {% if fresh %}
   <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-    {% for p in new_products %}{{ product_card(p) }}{% endfor %}
+    {% for p in fresh %}{{ product_card(p) }}{% endfor %}
   </div>
   {% else %}
   <div class="alert alert-light border">Cửa hàng đang cập nhật sản phẩm. Vui lòng quay lại sau.</div>
