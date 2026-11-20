@@ -22,13 +22,28 @@ class Category(db.Model):
     def cover_image(self):
         """Đường dẫn ảnh sản phẩm (trong static/) làm ảnh đại diện cho danh mục.
         Ưu tiên sản phẩm còn kinh doanh của chính danh mục này, sau đó đến các danh mục con.
+        Chỉ chọn ảnh thực sự tồn tại trên đĩa để tránh 404.
         """
+        import os
+        from flask import current_app
+
+        def _is_valid_file(rel):
+            if not rel or rel.startswith(("http://", "https://")):
+                return False
+            cleaned = rel.removeprefix("/static/").removeprefix("static/").lstrip("/")
+            if current_app and current_app.static_folder:
+                full_path = os.path.join(current_app.static_folder, cleaned.replace("/", os.sep))
+                return os.path.isfile(full_path)
+            return True
+
         def _find_img(cat):
             for p in cat.products:
-                if p.is_active and p.primary_image:
-                    raw_url = p.primary_image.url
-                    if raw_url and not raw_url.startswith(("http://", "https://")):
-                        return raw_url.removeprefix("/static/").removeprefix("static/").lstrip("/")
+                if p.is_active:
+                    if p.primary_image and _is_valid_file(p.primary_image.url):
+                        return p.primary_image.url.removeprefix("/static/").removeprefix("static/").lstrip("/")
+                    for img in p.images:
+                        if img.url and _is_valid_file(img.url):
+                            return img.url.removeprefix("/static/").removeprefix("static/").lstrip("/")
             return None
 
         img = _find_img(self)
