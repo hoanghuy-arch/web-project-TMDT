@@ -2,7 +2,22 @@
 {% from "shop/_cards.html" import product_card %}
 {% from "shop/_pager.html" import pager %}
 {% block title %}{{ category.name if category else ('Tìm "' ~ f.q ~ '"' if f.q else 'Sản phẩm') }}{% endblock %}
+
 {% block content %}
+{# Tham số hiện tại, dùng để dựng link xóa từng bộ lọc: url_for(..., **dict(base, size=...)) #}
+{% set base = {
+  'q': f.q or None,
+  'category': f.category or None,
+  'size': f.sizes,
+  'color': f.colors,
+  'min_price': f.min_price,
+  'max_price': f.max_price,
+  'in_stock': 1 if f.in_stock else None,
+  'sort': f.sort
+} %}
+{% set has_price = f.min_price is not none or f.max_price is not none %}
+{% set has_chips = f.q or category or f.sizes or f.colors or has_price or f.in_stock %}
+
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb small">
     <li class="breadcrumb-item"><a href="{{ url_for('shop.home') }}">Trang chủ</a></li>
@@ -15,15 +30,14 @@
   </ol>
 </nav>
 
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+<div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
   <div>
-    <h1 class="h4 mb-0">{{ category.name if category else 'Tất cả sản phẩm' }}</h1>
-    <div class="small text-muted">
-      {{ pagination.total }} sản phẩm{% if f.q %} cho từ khóa "<strong>{{ f.q }}</strong>" <a href="{{ url_for('shop.product_list', category=f.category or None) }}" class="text-danger text-decoration-none ms-1"><i class="bi bi-x-circle-fill"></i> Xóa tìm kiếm</a>{% endif %}
-    </div>
+    <h1 class="h3 fw-bold mb-0">{{ category.name if category else 'Tất cả sản phẩm' }}</h1>
+    <div class="small text-muted">{{ pagination.total }} sản phẩm</div>
   </div>
   <div class="d-flex align-items-center gap-2">
-    <button class="btn btn-outline-secondary btn-sm d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#filters" aria-expanded="false" aria-controls="filters">
+    <button class="btn btn-outline-secondary btn-sm d-lg-none" type="button"
+            data-bs-toggle="offcanvas" data-bs-target="#filters" aria-controls="filters">
       <i class="bi bi-funnel"></i> Bộ lọc
     </button>
     <label for="sort" class="small text-muted mb-0 d-none d-sm-block">Sắp xếp</label>
@@ -35,72 +49,140 @@
   </div>
 </div>
 
+{# ===== Chip "đang lọc" ===== #}
+{% if has_chips %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3" aria-label="Bộ lọc đang áp dụng">
+  {% if f.q %}
+    <a class="sz-chip" href="{{ url_for('shop.product_list', **dict(base, q=None)) }}">Từ khóa: {{ f.q }} <i class="bi bi-x-lg"></i></a>
+  {% endif %}
+  {% if category %}
+    <a class="sz-chip" href="{{ url_for('shop.product_list', **dict(base, category=None)) }}">{{ category.name }} <i class="bi bi-x-lg"></i></a>
+  {% endif %}
+  {% for s in sizes if s.id in f.sizes %}
+    <a class="sz-chip" href="{{ url_for('shop.product_list', **dict(base, size=f.sizes|reject('equalto', s.id)|list)) }}">Cỡ {{ s.name }} <i class="bi bi-x-lg"></i></a>
+  {% endfor %}
+  {% for c in colors if c.id in f.colors %}
+    <a class="sz-chip" href="{{ url_for('shop.product_list', **dict(base, color=f.colors|reject('equalto', c.id)|list)) }}">
+      <span class="sz-dot" style="background: {{ c.hex_code }}"></span>{{ c.name }} <i class="bi bi-x-lg"></i>
+    </a>
+  {% endfor %}
+  {% if has_price %}
+    <a class="sz-chip" href="{{ url_for('shop.product_list', **dict(base, min_price=None, max_price=None)) }}">
+      Giá: {{ '{:,.0f}'.format(f.min_price).replace(',', '.') if f.min_price is not none else '0' }}
+      – {{ '{:,.0f}'.format(f.max_price).replace(',', '.') if f.max_price is not none else '∞' }} ₫ <i class="bi bi-x-lg"></i>
+    </a>
+  {% endif %}
+  {% if f.in_stock %}
+    <a class="sz-chip" href="{{ url_for('shop.product_list', **dict(base, in_stock=None)) }}">Còn hàng <i class="bi bi-x-lg"></i></a>
+  {% endif %}
+  <a href="{{ clear_url }}" class="small ms-1">Xóa tất cả</a>
+</div>
+{% endif %}
+
 <div class="row g-4">
   <aside class="col-lg-3">
-    <div class="collapse d-lg-block" id="filters">
-      <form method="get" action="{{ url_for('shop.product_list') }}" id="filter-form" class="sz-filter card card-body border-0 shadow-sm">
-        {% if f.q %}<input type="hidden" name="q" value="{{ f.q }}">{% endif %}
-        {% if f.category %}<input type="hidden" name="category" value="{{ f.category }}">{% endif %}
+    {# Mobile: ngăn kéo bên trái. Desktop (lg trở lên): hiển thị bình thường trong cột #}
+    <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="filters" aria-labelledby="filtersLabel">
+      <div class="offcanvas-header">
+        <h2 class="offcanvas-title h5" id="filtersLabel">Bộ lọc</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#filters" aria-label="Đóng"></button>
+      </div>
 
-        <div class="mb-3">
-          <div class="fw-semibold mb-2">Danh mục</div>
-          <ul class="list-unstyled mb-0 small">
-            <li><a href="{{ url_for('shop.product_list', q=f.q or None) }}" class="{{ 'fw-bold text-sz' if not f.category }}">Tất cả</a></li>
-            {% for c in categories %}
-              <li class="mt-1">
-                <a href="{{ url_for('shop.product_list', category=c.slug, q=f.q or None) }}" class="{{ 'fw-bold text-sz' if f.category == c.slug }}">{{ c.name }}</a>
-                {% for child in c.children if child.is_active %}
-                  <div class="ms-3"><a href="{{ url_for('shop.product_list', category=child.slug, q=f.q or None) }}" class="{{ 'fw-bold text-sz' if f.category == child.slug else 'text-muted' }}">{{ child.name }}</a></div>
+      <div class="offcanvas-body d-block">
+        <form method="get" action="{{ url_for('shop.product_list') }}" id="filter-form" class="sz-filter">
+          {% if f.q %}<input type="hidden" name="q" value="{{ f.q }}">{% endif %}
+          {% if f.category %}<input type="hidden" name="category" value="{{ f.category }}">{% endif %}
+
+          {# --- Danh mục: luôn mở --- #}
+          <div class="sz-facet">
+            <div class="sz-facet__title">Danh mục</div>
+            <ul class="list-unstyled mb-0">
+              <li><a href="{{ url_for('shop.product_list', q=f.q or None) }}" class="sz-flink {{ 'is-active' if not f.category }}">Tất cả</a></li>
+              {% for c in categories %}
+                <li>
+                  <a href="{{ url_for('shop.product_list', category=c.slug, q=f.q or None) }}" class="sz-flink {{ 'is-active' if f.category == c.slug }}">
+                    <span>{{ c.name }}</span>
+                    {% if c.product_count is defined %}<span class="count">{{ c.product_count }}</span>{% endif %}
+                  </a>
+                  {% for child in c.children if child.is_active %}
+                    <a href="{{ url_for('shop.product_list', category=child.slug, q=f.q or None) }}" class="sz-flink sz-flink--child {{ 'is-active' if f.category == child.slug }}">
+                      <span>{{ child.name }}</span>
+                      {% if child.product_count is defined %}<span class="count">{{ child.product_count }}</span>{% endif %}
+                    </a>
+                  {% endfor %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          {# --- Kích cỡ: mở sẵn nếu đang lọc --- #}
+          {% if sizes %}
+          <div class="sz-facet">
+            <button class="sz-facet__title sz-facet__toggle {{ '' if f.sizes else 'collapsed' }}" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#facet-size"
+                    aria-expanded="{{ 'true' if f.sizes else 'false' }}" aria-controls="facet-size">
+              Kích cỡ <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="collapse {{ 'show' if f.sizes }}" id="facet-size">
+              <div class="d-flex flex-wrap gap-1 pt-2">
+                {% for s in sizes %}
+                  <input type="checkbox" class="btn-check" name="size" id="size-{{ s.id }}" value="{{ s.id }}" {{ 'checked' if s.id in f.sizes }}>
+                  <label class="btn btn-sm btn-outline-secondary" for="size-{{ s.id }}">{{ s.name }}</label>
                 {% endfor %}
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-
-        {% if sizes %}
-        <div class="mb-3">
-          <div class="fw-semibold mb-2">Kích cỡ</div>
-          <div class="d-flex flex-wrap gap-1">
-            {% for s in sizes %}
-              <input type="checkbox" class="btn-check" name="size" id="size-{{ s.id }}" value="{{ s.id }}" {{ 'checked' if s.id in f.sizes }}>
-              <label class="btn btn-sm btn-outline-secondary" for="size-{{ s.id }}">{{ s.name }}</label>
-            {% endfor %}
+              </div>
+            </div>
           </div>
-        </div>
-        {% endif %}
+          {% endif %}
 
-        {% if colors %}
-        <div class="mb-3">
-          <div class="fw-semibold mb-2">Màu sắc</div>
-          <div class="d-flex flex-wrap gap-1">
-            {% for c in colors %}
-              <input type="checkbox" class="btn-check" name="color" id="color-{{ c.id }}" value="{{ c.id }}" {{ 'checked' if c.id in f.colors }}>
-              <label class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" for="color-{{ c.id }}">
-                <span class="sz-dot" style="background: {{ c.hex_code }}"></span>{{ c.name }}
-              </label>
-            {% endfor %}
+          {# --- Màu sắc --- #}
+          {% if colors %}
+          <div class="sz-facet">
+            <button class="sz-facet__title sz-facet__toggle {{ '' if f.colors else 'collapsed' }}" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#facet-color"
+                    aria-expanded="{{ 'true' if f.colors else 'false' }}" aria-controls="facet-color">
+              Màu sắc <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="collapse {{ 'show' if f.colors }}" id="facet-color">
+              <div class="d-flex flex-wrap gap-1 pt-2">
+                {% for c in colors %}
+                  <input type="checkbox" class="btn-check" name="color" id="color-{{ c.id }}" value="{{ c.id }}" {{ 'checked' if c.id in f.colors }}>
+                  <label class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" for="color-{{ c.id }}">
+                    <span class="sz-dot" style="background: {{ c.hex_code }}"></span>{{ c.name }}
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
           </div>
-        </div>
-        {% endif %}
+          {% endif %}
 
-        <div class="mb-3">
-          <div class="fw-semibold mb-2">Mức giá (₫)</div>
-          <div class="input-group input-group-sm">
-            <input type="number" min="0" step="1000" name="min_price" class="form-control" placeholder="Từ" value="{{ f.min_price if f.min_price is not none }}" aria-label="Giá từ">
-            <input type="number" min="0" step="1000" name="max_price" class="form-control" placeholder="Đến" value="{{ f.max_price if f.max_price is not none }}" aria-label="Giá đến">
+          {# --- Mức giá --- #}
+          <div class="sz-facet">
+            <button class="sz-facet__title sz-facet__toggle {{ '' if has_price else 'collapsed' }}" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#facet-price"
+                    aria-expanded="{{ 'true' if has_price else 'false' }}" aria-controls="facet-price">
+              Mức giá (₫) <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="collapse {{ 'show' if has_price }}" id="facet-price">
+              <div class="input-group input-group-sm pt-2">
+                <input type="number" min="0" step="1000" name="min_price" class="form-control" placeholder="Từ" value="{{ f.min_price if f.min_price is not none }}" aria-label="Giá từ">
+                <input type="number" min="0" step="1000" name="max_price" class="form-control" placeholder="Đến" value="{{ f.max_price if f.max_price is not none }}" aria-label="Giá đến">
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="form-check mb-3">
-          <input class="form-check-input" type="checkbox" name="in_stock" value="1" id="in_stock" {{ 'checked' if f.in_stock }}>
-          <label class="form-check-label" for="in_stock">Chỉ hiện sản phẩm còn hàng</label>
-        </div>
+          <div class="sz-facet">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="in_stock" value="1" id="in_stock" {{ 'checked' if f.in_stock }}>
+              <label class="form-check-label" for="in_stock">Chỉ hiện sản phẩm còn hàng</label>
+            </div>
+          </div>
 
-        <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-sz btn-sm flex-fill">Áp dụng</button>
-          <a href="{{ clear_url }}" class="btn btn-outline-secondary btn-sm">Xóa lọc</a>
-        </div>
-      </form>
+          <div class="d-flex gap-2 pt-2">
+            <button type="submit" class="btn btn-sz btn-sm flex-fill">Áp dụng</button>
+            <a href="{{ clear_url }}" class="btn btn-outline-secondary btn-sm">Xóa lọc</a>
+          </div>
+        </form>
+      </div>
     </div>
   </aside>
 
